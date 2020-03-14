@@ -25,7 +25,7 @@ cv::Mat crop(const cv::Mat& img, int w, int h, int x, int y) {
 }
 
 
-cv::Mat rotate_in_frame(const cv::Mat& img, int angle) {
+cv::Mat rotate_in_frame(const cv::Mat& img, float angle) {
     // get rotation matrix for rotating the image around its center in pixel coordinates
     cv::Point2f center((img.cols - 1) / 2.0, (img.rows - 1) / 2.0);
     cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
@@ -55,11 +55,9 @@ cv::Mat saturate(const cv::Mat& img, int saturation, double scale) {
 }
 
 cv::Mat brighten(const cv::Mat& img, int brightness, int contrast) {
-    // what it does here is dst = (uchar) ((double)src*scale+saturation);
     cv::Mat saturated;
 
-//    img.convertTo(saturated, CV_8UC1, scale, saturation);
-//    *(contrast/127 + 1) - contrast + brightness
+    // *(contrast/127 + 1) - contrast + brightness
     img.convertTo(saturated, CV_8UC1, ((double) contrast / 127 + 1), brightness);
 
 
@@ -81,8 +79,9 @@ cv::Mat pink(const cv::Mat &img) {
 }
 
 
-void Sharpen(const Mat& myImage, Mat& Result) {
+Mat Sharpen(const Mat& myImage) {
     CV_Assert(myImage.depth() == CV_8U);  // accept only uchar images
+    Mat Result;
 
     Result.create(myImage.size(), myImage.type());
     const int nChannels = myImage.channels();
@@ -104,6 +103,8 @@ void Sharpen(const Mat& myImage, Mat& Result) {
     Result.row(Result.rows - 1).setTo(Scalar(0));
     Result.col(0).setTo(Scalar(0));
     Result.col(Result.cols - 1).setTo(Scalar(0));
+
+    return Result;
 }
 
 
