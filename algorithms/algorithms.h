@@ -22,7 +22,7 @@
  *
  * result with width = w, height = h
  *
-*/
+ */
 cv::Mat crop(const cv::Mat &img, int w, int h, int x = 0, int y = 0);
 
 /*

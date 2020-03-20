@@ -1,4 +1,3 @@
-
 //#include "stdafx.h"
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -10,33 +9,109 @@
 using namespace std;
 using namespace cv;
 
-
 int main() {
-    /*cv::Mat src1 = cv::imread("om.jpg");
-    imwrite( "om.jpeg", src1);
-*/
-    double alpha = 0.5;
-    double beta;
 
-    cv::Mat src1 = cv::imread("om.jpeg");
-    cv::Mat src2 = cv::imread("doge.jpeg");
+    string source_image, command;
 
-    src2 = crop(src2, 508, 395, 100);
-
-    cv::Mat dst = src1;
-
-
-
-    //namedWindow("Linear Blend", 1);
-    beta = (1.0 - alpha);
-    addWeighted(src1, alpha, src2, beta, 0.0, dst);
-
-
-
-    imwrite( "omdoge.jpeg", dst);
-    imshow("Linear Blend", dst);
-
-    waitKey(0);
-
+    while (true) {
+        cout << "Выберите изображение для обработки\n";
+        cin >> source_image;
+        cv::Mat src = cv::imread(source_image);
+        cout << "Что хотите сделать с изображением?\n";
+        cout << "> Повернуть (1)\n";
+        cout << "> Обрезать (2)\n";
+        cout << "> Изменить тон (3)\n";
+        cout << "> Изменить цвет (4)\n";
+        cout << "> Наложить другое изображение (5)\n";
+        cin >> command;
+        if (command == "1") {
+            float angle;
+            string new_name = "rotated_" + source_image;
+            cout << "Введите угол поворота: ";
+            cin >> angle;
+            cv::Mat new_image = rotate_in_frame(src, angle);
+            imwrite(new_name, new_image);
+        } else if (command == "2") {
+            int width, height, x, y;
+            string new_name = "cropped_" + source_image;
+            cout << "Введите новую ширину: ";
+            cin >> width;
+            cout << "Введите новую высоту: ";
+            cin >> height;
+            cout << "Введите координаты левого нижнего угла: ";
+            cin >> x >> y;
+            cv::Mat new_image = crop(src, width, height, x, y);
+            imwrite(new_name, new_image);
+        } else if (command == "3") {
+            cout << "> Яркость (1)\n";
+            cout << "> Резкость (2)\n";
+            cout << "> Насыщенность (3)\n";
+            cin >> command;
+            if (command == "1") {
+                int brightness, contrast;
+                string new_name = "bright_" + source_image;
+                cout << "Введите степень яркости (wtf?): ";
+                cin >> brightness;
+                cout << "Введите степень контрастности (wtf?): ";
+                cin >> contrast;
+                cv::Mat new_image = brighten(src, brightness, contrast);
+                imwrite(new_name, new_image);
+                cv::imshow("Linear Blend", new_image);
+                waitKey(0);
+            else if (command == "2") {
+                string new_name = "sharp_" + source_image;
+                cv::Mat new_image = Sharpen(src);
+                imwrite(new_name, new_image);
+                cv::imshow("Linear Blend", new_image);
+                waitKey(0);
+            else if (command == "3") {
+                int saturation;
+                double scale;
+                string new_name = "saturated_" + source_image;
+                cout << "Введите степень насыщенности (wtf?): ";
+                cin >> saturation;
+                cv::Mat new_image = saturate(src, saturation, scale = 1);
+                imwrite(new_name, new_image);
+            else {
+                cout << "Неизвестная команда\n";
+                continue;
+            }
+            imwrite(new_name, new_image);
+            cv::imshow("Linear Blend", new_image);
+            waitKey(0);
+        } else if (command == "4") {
+            cout << "> Чёрно-белый фильтр (1)\n";
+            cout << "> Розовый фиьтр (2)\n";
+            cin >> command;
+            if (command == "1") {
+                string new_name = "pink_" + source_image;
+                cv::Mat new_image = pink(src);
+            else if (command == "2") {
+                string new_name = "bw_" + source_image;
+                cv::Mat new_image = gray(src);
+            else {
+                cout << "Неизвестная команда\n";
+                continue;
+            }
+            imwrite(new_name, new_image);
+            cv::imshow("Linear Blend", new_image);
+            waitKey(0);
+        } else if (command == "5") {
+            double alpha = 0.5;
+            string another_source_image;
+            string new_name = "blended_" + source_image;
+            cout << "Выберите изображение для наложения\n";
+            cin >> another_source_image;
+            cv::Mat another_src = cv::imread(another_source_image);
+            cv::Mat new_image = blend(src, another_src, alpha);
+            imwrite(new_name, new_image);
+            cv::imshow("Linear Blend", new_image);
+            waitKey(0);
+        } else if (command == "exit") {
+            return 0;
+        } else {
+            cout << "Неизвестная команда\n";
+        }
+    }
 
 }
