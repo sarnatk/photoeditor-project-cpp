@@ -1,19 +1,19 @@
 //#include "stdafx.h"
-#include <iostream>
-#include <string>
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgproc.hpp"
 #include "algorithms.h"
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace cv;
 
 int main() {
 
-    string source_image, command;
+    string source_image, command, new_name;
 
     while (true) {
         cout << "Выберите изображение для обработки\n";
@@ -28,14 +28,14 @@ int main() {
         cin >> command;
         if (command == "1") {
             float angle;
-            string new_name = "rotated_" + source_image;
+            new_name = "rotated_" + source_image;
             cout << "Введите угол поворота: ";
             cin >> angle;
             cv::Mat new_image = rotate_in_frame(src, angle);
             imwrite(new_name, new_image);
         } else if (command == "2") {
             int width, height, x, y;
-            string new_name = "cropped_" + source_image;
+            new_name = "cropped_" + source_image;
             cout << "Введите новую ширину: ";
             cin >> width;
             cout << "Введите новую высоту: ";
@@ -51,7 +51,7 @@ int main() {
             cin >> command;
             if (command == "1") {
                 int brightness, contrast;
-                string new_name = "bright_" + source_image;
+                new_name = "bright_" + source_image;
                 cout << "Введите степень яркости (wtf?): ";
                 cin >> brightness;
                 cout << "Введите степень контрастности (wtf?): ";
@@ -61,7 +61,7 @@ int main() {
                 cv::imshow("Linear Blend", new_image);
                 waitKey(0);
             } else if (command == "2") {
-                string new_name = "sharp_" + source_image;
+                new_name = "sharp_" + source_image;
                 cv::Mat new_image = Sharpen(src);
                 imwrite(new_name, new_image);
                 cv::imshow("Linear Blend", new_image);
@@ -69,7 +69,7 @@ int main() {
             } else if (command == "3") {
                 int saturation;
                 double scale;
-                string new_name = "saturated_" + source_image;
+                new_name = "saturated_" + source_image;
                 cout << "Введите степень насыщенности (wtf?): ";
                 cin >> saturation;
                 cv::Mat new_image = saturate(src, saturation, scale = 1);
@@ -86,11 +86,11 @@ int main() {
             cout << "> Розовый фиьтр (2)\n";
             cin >> command;
             if (command == "1") {
-                string new_name = "pink_" + source_image;
-                cv::Mat new_image = pink(src);
-            } else if (command == "2") {
-                string new_name = "bw_" + source_image;
+                new_name = "bw_" + source_image;
                 cv::Mat new_image = gray(src);
+            } else if (command == "2") {
+                new_name = "pink_" + source_image;
+                cv::Mat new_image = pink(src);
             } else {
                 cout << "Неизвестная команда\n";
                 continue;
@@ -101,7 +101,7 @@ int main() {
         } else if (command == "5") {
             double alpha = 0.5;
             string another_source_image;
-            string new_name = "blended_" + source_image;
+            new_name = "blended_" + source_image;
             cout << "Выберите изображение для наложения\n";
             cin >> another_source_image;
             cv::Mat another_src = cv::imread(another_source_image);
@@ -109,10 +109,16 @@ int main() {
             imwrite(new_name, new_image);
             cv::imshow("Linear Blend", new_image);
             waitKey(0);
-        } else if (command == "exit") {
-            return 0;
         } else {
             cout << "Неизвестная команда\n";
+            continue;
+        }
+        cout << "Успешно сохранено в файл " << new_name << "\n";
+        cout << "> Продолжить работу (1)\n";
+        cout << "> Выйти из приложения (2)\n";
+        cin >> command;
+        if (command == "2") {
+            return 0;
         }
     }
 }
