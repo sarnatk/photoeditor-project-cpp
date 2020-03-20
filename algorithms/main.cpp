@@ -60,13 +60,13 @@ int main() {
                 imwrite(new_name, new_image);
                 cv::imshow("Linear Blend", new_image);
                 waitKey(0);
-            else if (command == "2") {
+            } else if (command == "2") {
                 string new_name = "sharp_" + source_image;
                 cv::Mat new_image = Sharpen(src);
                 imwrite(new_name, new_image);
                 cv::imshow("Linear Blend", new_image);
                 waitKey(0);
-            else if (command == "3") {
+            } else if (command == "3") {
                 int saturation;
                 double scale;
                 string new_name = "saturated_" + source_image;
@@ -74,7 +74,7 @@ int main() {
                 cin >> saturation;
                 cv::Mat new_image = saturate(src, saturation, scale = 1);
                 imwrite(new_name, new_image);
-            else {
+            } else {
                 cout << "Неизвестная команда\n";
                 continue;
             }
@@ -88,10 +88,10 @@ int main() {
             if (command == "1") {
                 string new_name = "pink_" + source_image;
                 cv::Mat new_image = pink(src);
-            else if (command == "2") {
+            } else if (command == "2") {
                 string new_name = "bw_" + source_image;
                 cv::Mat new_image = gray(src);
-            else {
+            } else {
                 cout << "Неизвестная команда\n";
                 continue;
             }
@@ -115,5 +115,5 @@ int main() {
             cout << "Неизвестная команда\n";
         }
     }
-
 }
+
