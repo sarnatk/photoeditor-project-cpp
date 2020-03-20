@@ -1,24 +1,25 @@
-//#include "stdafx.h"
-#include <iostream>
-#include <string>
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgproc.hpp"
 #include "algorithms.h"
+#include <iostream>
+#include <string>
+
 using namespace std;
 using namespace cv;
 
 int main() {
 
     string source_image, command, new_name;
+    cv::Mat new_image;
+
 
     while (true) {
         cout << "Выберите изображение для обработки\n";
         cin >> source_image;
         cv::Mat src = cv::imread(source_image);
-        cv::Mat new_image;
         cout << "Что хотите сделать с изображением?\n";
         cout << "> Повернуть (1)\n";
         cout << "> Обрезать (2)\n";
@@ -62,7 +63,7 @@ int main() {
                 waitKey(0);
             } else if (command == "2") {
                 new_name = "sharp_" + source_image;
-                cv::Mat new_image = Sharpen(src);
+                new_image = Sharpen(src);
                 imwrite(new_name, new_image);
                 cv::imshow("Linear Blend", new_image);
                 waitKey(0);
@@ -122,4 +123,3 @@ int main() {
         }
     }
 }
-
