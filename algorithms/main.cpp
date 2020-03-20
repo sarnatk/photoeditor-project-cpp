@@ -1,13 +1,12 @@
 //#include "stdafx.h"
+#include <iostream>
+#include <string>
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgproc.hpp"
 #include "algorithms.h"
-#include <iostream>
-#include <string>
-
 using namespace std;
 using namespace cv;
 
@@ -19,6 +18,7 @@ int main() {
         cout << "Выберите изображение для обработки\n";
         cin >> source_image;
         cv::Mat src = cv::imread(source_image);
+        cv::Mat new_image;
         cout << "Что хотите сделать с изображением?\n";
         cout << "> Повернуть (1)\n";
         cout << "> Обрезать (2)\n";
@@ -31,7 +31,7 @@ int main() {
             new_name = "rotated_" + source_image;
             cout << "Введите угол поворота: ";
             cin >> angle;
-            cv::Mat new_image = rotate_in_frame(src, angle);
+            new_image = rotate_in_frame(src, angle);
             imwrite(new_name, new_image);
         } else if (command == "2") {
             int width, height, x, y;
@@ -42,7 +42,7 @@ int main() {
             cin >> height;
             cout << "Введите координаты левого нижнего угла: ";
             cin >> x >> y;
-            cv::Mat new_image = crop(src, width, height, x, y);
+            new_image = crop(src, width, height, x, y);
             imwrite(new_name, new_image);
         } else if (command == "3") {
             cout << "> Яркость (1)\n";
@@ -56,7 +56,7 @@ int main() {
                 cin >> brightness;
                 cout << "Введите степень контрастности (wtf?): ";
                 cin >> contrast;
-                cv::Mat new_image = brighten(src, brightness, contrast);
+                new_image = brighten(src, brightness, contrast);
                 imwrite(new_name, new_image);
                 cv::imshow("Linear Blend", new_image);
                 waitKey(0);
@@ -72,7 +72,7 @@ int main() {
                 new_name = "saturated_" + source_image;
                 cout << "Введите степень насыщенности (wtf?): ";
                 cin >> saturation;
-                cv::Mat new_image = saturate(src, saturation, scale = 1);
+                new_image = saturate(src, saturation, scale = 1);
                 imwrite(new_name, new_image);
             } else {
                 cout << "Неизвестная команда\n";
@@ -87,10 +87,10 @@ int main() {
             cin >> command;
             if (command == "1") {
                 new_name = "bw_" + source_image;
-                cv::Mat new_image = gray(src);
+                new_image = gray(src);
             } else if (command == "2") {
                 new_name = "pink_" + source_image;
-                cv::Mat new_image = pink(src);
+                new_image = pink(src);
             } else {
                 cout << "Неизвестная команда\n";
                 continue;
@@ -105,7 +105,7 @@ int main() {
             cout << "Выберите изображение для наложения\n";
             cin >> another_source_image;
             cv::Mat another_src = cv::imread(another_source_image);
-            cv::Mat new_image = blend(src, another_src, alpha);
+            new_image = blend(src, another_src, alpha);
             imwrite(new_name, new_image);
             cv::imshow("Linear Blend", new_image);
             waitKey(0);
