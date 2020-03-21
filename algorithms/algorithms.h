@@ -16,13 +16,20 @@
  *
  */
 
+/*
+ *
+ * take picture using camera
+ *
+ */
+cv::Mat takePicture(cv::VideoCapture cam);
+
 
 /*
  * crops image
  *
  * result with width = w, height = h
  *
- */
+*/
 cv::Mat crop(const cv::Mat &img, int w, int h, int x = 0, int y = 0);
 
 /*
