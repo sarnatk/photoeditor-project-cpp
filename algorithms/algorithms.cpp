@@ -7,17 +7,16 @@
 
 using namespace cv;
 
-cv::Mat takePicture() {
-    cv::VideoCapture cam(0);
-    cv::Mat pic, res;
+cv::Mat takePicture(cv::VideoCapture cam) {
+    cv::Mat pic;
+
     while (!cam.isOpened()) {
         std::cout << "Failed to make connection to cam" << std::endl;
         cam.open(0);
     }
     cam >> pic;
-
-    flip(pic, res, 1);
-    return res;
+    flip(pic, pic, 1);
+    return pic;
 }
 
 cv::Mat crop(const cv::Mat& img, int w, int h, int x, int y) {
