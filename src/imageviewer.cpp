@@ -1,5 +1,5 @@
 #include "../include/imageviewer.h"
-#include "algorithms/algorithms.h"
+#include "algorithms.h"
 
 #include <QApplication>
 #include <QClipboard>
