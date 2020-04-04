@@ -1,4 +1,5 @@
-#include "imageviewer.h"
+#include "../include/imageviewer.h"
+#include "algorithms/algorithms.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -222,6 +223,16 @@ void ImageViewer::paste() {
 #endif // !QT_NO_CLIPBOARD
 }
 
+void ImageViewer::rotate() {
+    /*
+     * Примерно так должно работать, но я не понимаю че за format
+     *
+    cv::Mat mat(image.height(),image.width(), format, image.bits(), image.bytesPerLine());
+    rotate_in_frame(mat, 90);
+    QImage(mat.data, mat.cols, mat.rows, mat.step, format);
+    */
+}
+
 void ImageViewer::zoomIn() {
     scaleImage(1.25);
 }
@@ -277,6 +288,10 @@ void ImageViewer::createActions() {
     QAction *pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
     pasteAct->setShortcut(QKeySequence::Paste);
 
+    rotateAct = editMenu->addAction(tr("&Rotate"), this, &ImageViewer::rotate);
+    rotateAct->setShortcut(tr("Ctrl+R"));
+    rotateAct->setEnabled(false);
+
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
@@ -307,6 +322,7 @@ void ImageViewer::createActions() {
 void ImageViewer::updateActions() {
     saveAsAct->setEnabled(!image.isNull());
     copyAct->setEnabled(!image.isNull());
+    rotateAct->setEnabled(!image.isNull());
     zoomInAct->setEnabled(!fitToWindowAct->isChecked());
     zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
     normalSizeAct->setEnabled(!fitToWindowAct->isChecked());

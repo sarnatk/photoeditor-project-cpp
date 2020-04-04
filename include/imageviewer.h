@@ -11,6 +11,7 @@
 #  if QT_CONFIG(printer)
 
 #    include <QPrinter>
+#include <opencv2/core/mat.hpp>
 
 #  endif
 #endif
@@ -35,7 +36,7 @@ Q_OBJECT
 public:
     ImageViewer(QWidget *parent = nullptr);
 
-    bool loadFile(const QString&);
+    bool loadFile(const QString &);
 
 private slots:
 
@@ -48,6 +49,8 @@ private slots:
     void copy();
 
     void paste();
+
+    void rotate();
 
     void zoomIn();
 
@@ -64,9 +67,9 @@ private:
 
     void updateActions();
 
-    bool saveFile(const QString& fileName);
+    bool saveFile(const QString &fileName);
 
-    void setImage(const QImage& newImage);
+    void setImage(const QImage &newImage);
 
     void scaleImage(double factor);
 
@@ -86,6 +89,7 @@ private:
     QAction *saveAsAct;
     QAction *printAct;
     QAction *copyAct;
+    QAction *rotateAct;
     QAction *zoomInAct;
     QAction *zoomOutAct;
     QAction *normalSizeAct;
