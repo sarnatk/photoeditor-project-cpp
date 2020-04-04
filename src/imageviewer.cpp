@@ -224,13 +224,10 @@ void ImageViewer::paste() {
 }
 
 void ImageViewer::rotate() {
-    /*
-     * Примерно так должно работать, но я не понимаю че за format
-     *
-    cv::Mat mat(image.height(),image.width(), format, image.bits(), image.bytesPerLine());
-    rotate_in_frame(mat, 90);
-    QImage(mat.data, mat.cols, mat.rows, mat.step, format);
-    */
+    cv::Mat mat = to_mat(image);
+    cv::Mat rotated_mat = rotate_in_frame(mat, 90);
+    image = to_QImage(rotated_mat);
+    setImage(image);
 }
 
 void ImageViewer::zoomIn() {

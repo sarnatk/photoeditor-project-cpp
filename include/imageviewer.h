@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QImage>
+#include <iostream>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 
@@ -12,6 +13,7 @@
 
 #    include <QPrinter>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc.hpp>
 
 #  endif
 #endif
@@ -61,6 +63,20 @@ private slots:
     void fitToWindow();
 
     void about();
+
+private:
+    QImage to_QImage(cv::Mat const &src) {
+        QImage dest((const uchar *) src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
+        dest.bits();
+        return dest;
+    }
+
+    // ПРОБЛЕМЫ ЗДЕСЬ (возможно дело в CV_8UC4, но может и нет)
+    cv::Mat to_mat(QImage const &inImage) {
+        cv::Mat mat(inImage.height(), inImage.width(), CV_8UC4, const_cast<uchar *>(inImage.bits()),
+                    static_cast<size_t>(inImage.bytesPerLine()));
+        return mat;
+    }
 
 private:
     void createActions();
