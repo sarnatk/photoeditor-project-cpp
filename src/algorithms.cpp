@@ -19,12 +19,12 @@ cv::Mat takePicture(cv::VideoCapture cam) {
     return pic;
 }
 
-cv::Mat crop(const cv::Mat& img, int w, int h, int x, int y) {
+cv::Mat crop(const cv::Mat &img, int w, int h, int x, int y) {
     return img(cv::Rect(x, y, w, h));
 }
 
 
-cv::Mat rotate_in_frame(const cv::Mat& img, double angle) {
+cv::Mat rotate_in_frame(const cv::Mat &img, double angle) {
     // get rotation matrix for rotating the image around its center in pixel coordinates
     cv::Point2f center((img.cols - 1) / 2.0, (img.rows - 1) / 2.0);
     cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
@@ -41,7 +41,7 @@ cv::Mat rotate_in_frame(const cv::Mat& img, double angle) {
     return dst;
 }
 
-cv::Mat saturate(const cv::Mat& img, int saturation, double scale) {
+cv::Mat saturate(const cv::Mat &img, int saturation, double scale) {
     // what it does here is dst = (uchar) ((double)src*scale+saturation);
     cv::Mat saturated;
 
@@ -53,7 +53,7 @@ cv::Mat saturate(const cv::Mat& img, int saturation, double scale) {
     return saturated;
 }
 
-cv::Mat brighten(const cv::Mat& img, int brightness, int contrast) {
+cv::Mat brighten(const cv::Mat &img, int brightness, int contrast) {
     cv::Mat saturated;
 
     // *(contrast/127 + 1) - contrast + brightness
@@ -73,12 +73,23 @@ cv::Mat gray(const cv::Mat &img) {
 
 cv::Mat pink(const cv::Mat &img) {
     cv::Mat pink;
-    cvtColor(img, pink,  cv::COLOR_YCrCb2RGB);
+    cvtColor(img, pink, cv::COLOR_YCrCb2RGB);
     return pink;
 }
 
+cv::Mat blue(const cv::Mat &img) {
+    cv::Mat blue(img), mask;
+    inRange(blue, Scalar(0, 0, 0), Scalar(0, 255, 0), mask);
+    return blue;
+}
 
-Mat Sharpen(const Mat& myImage) {
+cv::Mat green(const cv::Mat &img) {
+    cv::Mat green(img), mask;
+    inRange(green, Scalar(0, 0, 0), Scalar(255, 0, 255), mask);
+    return green;
+}
+
+Mat Sharpen(const Mat &myImage) {
     CV_Assert(myImage.depth() == CV_8U);  // accept only uchar images
     Mat Result;
 
@@ -86,11 +97,11 @@ Mat Sharpen(const Mat& myImage) {
     const int nChannels = myImage.channels();
 
     for (int j = 1; j < myImage.rows - 1; ++j) {
-        const auto* previous = myImage.ptr<uchar>(j - 1);
-        const auto* current = myImage.ptr<uchar>(j);
-        const auto* next = myImage.ptr<uchar>(j + 1);
+        const auto *previous = myImage.ptr<uchar>(j - 1);
+        const auto *current = myImage.ptr<uchar>(j);
+        const auto *next = myImage.ptr<uchar>(j + 1);
 
-        auto* output = Result.ptr<uchar>(j);
+        auto *output = Result.ptr<uchar>(j);
 
         for (int i = nChannels; i < nChannels * (myImage.cols - 1); ++i) {
             *output++ = saturate_cast<uchar>(5 * current[i]

@@ -70,6 +70,20 @@ cv::Mat pink(const cv::Mat &img);
 
 /*
  *
+ * blue filter
+ *
+ */
+cv::Mat blue(const cv::Mat &img);
+
+/*
+ *
+ * green filter
+ *
+ */
+cv::Mat green(const cv::Mat &img);
+
+/*
+ *
  * blends two images with given ratio
  *
  */

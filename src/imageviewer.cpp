@@ -232,6 +232,20 @@ void ImageViewer::rotate() {
     setImage(image);
 }
 
+void ImageViewer::color() {
+    QStringList items;
+    items << tr("Blue") << tr("Green")<< tr("Pink")  << tr("Black and White");
+    QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
+    cv::Mat mat = to_mat(image);
+    cv::Mat colored_mat;
+    if (item == "Blue") colored_mat = blue(mat);
+    if (item == "Green") colored_mat = green(mat);
+    if (item == "Pink") colored_mat = pink(mat);
+    if (item == "Black and White") colored_mat = gray(mat);
+    image = to_QImage(colored_mat);
+    setImage(image);
+}
+
 void ImageViewer::zoomIn() {
     scaleImage(1.25);
 }
@@ -291,6 +305,9 @@ void ImageViewer::createActions() {
     rotateAct->setShortcut(tr("Ctrl+R"));
     rotateAct->setEnabled(false);
 
+    colorAct = editMenu->addAction(tr("Color"), this, &ImageViewer::color);
+    colorAct->setEnabled(false);
+
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
@@ -322,6 +339,7 @@ void ImageViewer::updateActions() {
     saveAsAct->setEnabled(!image.isNull());
     copyAct->setEnabled(!image.isNull());
     rotateAct->setEnabled(!image.isNull());
+    colorAct->setEnabled(!image.isNull());
     zoomInAct->setEnabled(!fitToWindowAct->isChecked());
     zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
     normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
