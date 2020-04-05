@@ -24,7 +24,7 @@ cv::Mat crop(const cv::Mat& img, int w, int h, int x, int y) {
 }
 
 
-cv::Mat rotate_in_frame(const cv::Mat& img, float angle) {
+cv::Mat rotate_in_frame(const cv::Mat& img, double angle) {
     // get rotation matrix for rotating the image around its center in pixel coordinates
     cv::Point2f center((img.cols - 1) / 2.0, (img.rows - 1) / 2.0);
     cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);

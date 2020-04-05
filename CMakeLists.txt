@@ -29,4 +29,3 @@ add_executable(photoeditor include/imageviewer.h include/algorithms.h src/imagev
 
 
 target_link_libraries(photoeditor ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5PrintSupport_LIBRARIES} ${OpenCV_LIBS})
-

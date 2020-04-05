@@ -26,8 +26,9 @@
 #  if QT_CONFIG(printdialog)
 
 #    include <QPrintDialog>
-#include <QtWidgets/QStyleFactory>
-#include <QtWidgets/QGraphicsView>
+#    include <QtWidgets/QStyleFactory>
+#    include <QtWidgets/QGraphicsView>
+#    include <QtWidgets/QInputDialog>
 
 #  endif
 #endif
@@ -84,7 +85,7 @@ ImageViewer::ImageViewer(QWidget *parent)
 }
 
 
-bool ImageViewer::loadFile(const QString& fileName) {
+bool ImageViewer::loadFile(const QString &fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
     const QImage newImage = reader.read();
@@ -105,7 +106,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
     return true;
 }
 
-void ImageViewer::setImage(const QImage& newImage) {
+void ImageViewer::setImage(const QImage &newImage) {
     image = newImage;
 
     imageLabel->setPixmap(QPixmap::fromImage(image));
@@ -121,7 +122,7 @@ void ImageViewer::setImage(const QImage& newImage) {
 }
 
 
-bool ImageViewer::saveFile(const QString& fileName) {
+bool ImageViewer::saveFile(const QString &fileName) {
     QImageWriter writer(fileName);
 
     if (!writer.write(image)) {
@@ -136,7 +137,7 @@ bool ImageViewer::saveFile(const QString& fileName) {
 }
 
 
-static void initializeImageFileDialog(QFileDialog& dialog, QFileDialog::AcceptMode acceptMode) {
+static void initializeImageFileDialog(QFileDialog &dialog, QFileDialog::AcceptMode acceptMode) {
     static bool firstDialog = true;
 
     if (firstDialog) {
@@ -148,7 +149,7 @@ static void initializeImageFileDialog(QFileDialog& dialog, QFileDialog::AcceptMo
     QStringList mimeTypeFilters;
     const QByteArrayList supportedMimeTypes = acceptMode == QFileDialog::AcceptOpen
                                               ? QImageReader::supportedMimeTypes() : QImageWriter::supportedMimeTypes();
-    for (const QByteArray& mimeTypeName : supportedMimeTypes)
+    for (const QByteArray &mimeTypeName : supportedMimeTypes)
         mimeTypeFilters.append(mimeTypeName);
     mimeTypeFilters.sort();
     dialog.setMimeTypeFilters(mimeTypeFilters);
@@ -224,8 +225,9 @@ void ImageViewer::paste() {
 }
 
 void ImageViewer::rotate() {
+    double angle = QInputDialog::getDouble(this, tr("Rotate"), tr("Angle:"), 0, 0, 360, 0);
     cv::Mat mat = to_mat(image);
-    cv::Mat rotated_mat = rotate_in_frame(mat, 90);
+    cv::Mat rotated_mat = rotate_in_frame(mat, angle);
     image = to_QImage(rotated_mat);
     setImage(image);
 }

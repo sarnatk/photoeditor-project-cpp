@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QImage>
-#include <iostream>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 
@@ -75,7 +74,9 @@ private:
     cv::Mat to_mat(QImage const &inImage) {
         cv::Mat mat(inImage.height(), inImage.width(), CV_8UC4, const_cast<uchar *>(inImage.bits()),
                     static_cast<size_t>(inImage.bytesPerLine()));
-        return mat;
+        cv::Mat  matNoAlpha;
+        cv::cvtColor( mat, matNoAlpha, cv::COLOR_BGRA2BGR );   // drop the all-white alpha channel
+        return matNoAlpha;
     }
 
 private:

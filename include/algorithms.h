@@ -37,7 +37,7 @@ cv::Mat crop(const cv::Mat &img, int w, int h, int x = 0, int y = 0);
  * rotates image by given angle without crop
  *
  */
-cv::Mat rotate_in_frame(const cv::Mat &img, float angle);
+cv::Mat rotate_in_frame(const cv::Mat &img, double angle);
 
 /*
  *
