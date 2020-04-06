@@ -85,31 +85,32 @@ ImageViewer::ImageViewer(QWidget *parent)
 }
 
 
-bool ImageViewer::loadFile(const QString &fileName) {
+bool ImageViewer::loadFile(const QString& fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
-    const QImage newImage = reader.read();
-    if (newImage.isNull()) {
+
+    cv::Mat newMat = cv::imread(fileName.toStdString());
+    if (newMat.empty()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot load %1: %2")
                                          .arg(QDir::toNativeSeparators(fileName), reader.errorString()));
         return false;
     }
 
-    setImage(newImage);
+    setImage(newMat);
 
     setWindowFilePath(fileName);
 
     const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
-            .arg(QDir::toNativeSeparators(fileName)).arg(image.width()).arg(image.height()).arg(image.depth());
+            .arg(QDir::toNativeSeparators(fileName)).arg(mat.cols).arg(mat.rows).arg(mat.depth());
     statusBar()->showMessage(message);
     return true;
 }
 
-void ImageViewer::setImage(const QImage &newImage) {
-    image = newImage;
+void ImageViewer::setImage(const cv::Mat& newMat) {
+    mat = newMat;
 
-    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setPixmap(cvMatToQPixmap(mat));
     scaleFactor = 1.0;
 
     scrollArea->setVisible(true);
@@ -122,10 +123,13 @@ void ImageViewer::setImage(const QImage &newImage) {
 }
 
 
-bool ImageViewer::saveFile(const QString &fileName) {
+bool ImageViewer::saveFile(const QString& fileName) {
+    std::cerr << "\n\nin SaveFile\n\n";
+
     QImageWriter writer(fileName);
 
-    if (!writer.write(image)) {
+
+    if (!imwrite(fileName.toStdString(), mat)) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot write %1: %2")
                                          .arg(QDir::toNativeSeparators(fileName)), writer.errorString());
@@ -137,39 +141,28 @@ bool ImageViewer::saveFile(const QString &fileName) {
 }
 
 
-static void initializeImageFileDialog(QFileDialog &dialog, QFileDialog::AcceptMode acceptMode) {
-    static bool firstDialog = true;
-
-    if (firstDialog) {
-        firstDialog = false;
-        const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
-        dialog.setDirectory(picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.last());
-    }
-
-    QStringList mimeTypeFilters;
-    const QByteArrayList supportedMimeTypes = acceptMode == QFileDialog::AcceptOpen
-                                              ? QImageReader::supportedMimeTypes() : QImageWriter::supportedMimeTypes();
-    for (const QByteArray &mimeTypeName : supportedMimeTypes)
-        mimeTypeFilters.append(mimeTypeName);
-    mimeTypeFilters.sort();
-    dialog.setMimeTypeFilters(mimeTypeFilters);
-    dialog.selectMimeTypeFilter("image/jpeg");
-    if (acceptMode == QFileDialog::AcceptSave)
-        dialog.setDefaultSuffix("jpg");
-}
-
 void ImageViewer::open() {
-    QFileDialog dialog(this, tr("Open File"));
-    initializeImageFileDialog(dialog, QFileDialog::AcceptOpen);
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    QStringList list;
+    for (auto& fmt : formats)
+        list.append("*." + QString(fmt));
+    auto filter = "Images (" + list.join(" ") + ")";
 
-    while (dialog.exec() == QDialog::Accepted && !loadFile(dialog.selectedFiles().first())) {}
+
+    QString path = QFileDialog::getOpenFileName(nullptr, "Pick an image file",
+                                                nullptr, filter);
+    if (path.isEmpty())
+        return;
+    loadFile(path);
+
 }
 
 void ImageViewer::saveAs() {
-    QFileDialog dialog(this, tr("Save File As"));
-    initializeImageFileDialog(dialog, QFileDialog::AcceptSave);
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File As"),
+                                                    QString(),
+                                                    tr("Images (*.png *jpg *jpeg *bmp)"));
 
-    while (dialog.exec() == QDialog::Accepted && !saveFile(dialog.selectedFiles().first())) {}
+    while (!saveFile(fileName)) {}
 }
 
 void ImageViewer::print() {
@@ -190,7 +183,7 @@ void ImageViewer::print() {
 
 void ImageViewer::copy() {
 #ifndef QT_NO_CLIPBOARD
-    QGuiApplication::clipboard()->setImage(image);
+    QGuiApplication::clipboard()->setImage(cvMatToQImage(mat));
 #endif // !QT_NO_CLIPBOARD
 }
 
@@ -199,7 +192,7 @@ void ImageViewer::copy() {
 static QImage clipboardImage() {
     if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData()) {
         if (mimeData->hasImage()) {
-            const QImage image = qvariant_cast<QImage>(mimeData->imageData());
+            const auto image = qvariant_cast<QImage>(mimeData->imageData());
             if (!image.isNull())
                 return image;
         }
@@ -215,7 +208,7 @@ void ImageViewer::paste() {
     if (newImage.isNull()) {
         statusBar()->showMessage(tr("No image in clipboard"));
     } else {
-        setImage(newImage);
+        setImage(mat);
         setWindowFilePath(QString());
         const QString message = tr("Obtained image from clipboard, %1x%2, Depth: %3")
                 .arg(newImage.width()).arg(newImage.height()).arg(newImage.depth());
@@ -226,24 +219,22 @@ void ImageViewer::paste() {
 
 void ImageViewer::rotate() {
     double angle = QInputDialog::getDouble(this, tr("Rotate"), tr("Angle:"), 0, 0, 360, 0);
-    cv::Mat mat = to_mat(image);
-    cv::Mat rotated_mat = rotate_in_frame(mat, angle);
-    image = to_QImage(rotated_mat);
-    setImage(image);
+
+    setImage(rotate_in_frame(mat, angle));
 }
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Blue") << tr("Green")<< tr("Pink")  << tr("Black and White");
+    items << tr("Blue") << tr("Green") << tr("Pink") << tr("Black and White");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
-    cv::Mat mat = to_mat(image);
+
     cv::Mat colored_mat;
     if (item == "Blue") colored_mat = blue(mat);
     if (item == "Green") colored_mat = green(mat);
     if (item == "Pink") colored_mat = pink(mat);
     if (item == "Black and White") colored_mat = gray(mat);
-    image = to_QImage(colored_mat);
-    setImage(image);
+
+    setImage(colored_mat);
 }
 
 void ImageViewer::zoomIn() {
@@ -336,10 +327,10 @@ void ImageViewer::createActions() {
 }
 
 void ImageViewer::updateActions() {
-    saveAsAct->setEnabled(!image.isNull());
-    copyAct->setEnabled(!image.isNull());
-    rotateAct->setEnabled(!image.isNull());
-    colorAct->setEnabled(!image.isNull());
+    saveAsAct->setEnabled(!mat.empty());
+    copyAct->setEnabled(!mat.empty());
+    rotateAct->setEnabled(!mat.empty());
+    colorAct->setEnabled(!mat.empty());
     zoomInAct->setEnabled(!fitToWindowAct->isChecked());
     zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
     normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
