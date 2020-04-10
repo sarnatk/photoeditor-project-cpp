@@ -30,6 +30,7 @@
 #    include <QtWidgets/QGraphicsView>
 #    include <QtWidgets/QInputDialog>
 #include <QtWidgets/QColorDialog>
+#include <QtWidgets/QSlider>
 
 #  endif
 #endif
@@ -100,12 +101,13 @@ bool ImageViewer::loadFile(const QString& fileName) {
     }
 
     setImage(newMat);
-    fitToWindow();
+
     setWindowFilePath(fileName);
 
     const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
             .arg(QDir::toNativeSeparators(fileName)).arg(mat.cols).arg(mat.rows).arg(mat.depth());
     statusBar()->showMessage(message);
+
     return true;
 }
 
@@ -118,6 +120,9 @@ void ImageViewer::setImage(const cv::Mat& newMat) {
     scrollArea->setVisible(true);
     printAct->setEnabled(true);
     fitToWindowAct->setEnabled(true);
+
+    fitToWindow();
+
     updateActions();
 }
 
@@ -304,6 +309,12 @@ void ImageViewer::createActions() {
     colorAct = editMenu->addAction(tr("Color"), this, &ImageViewer::color);
     colorAct->setEnabled(false);
 
+    tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::tint);
+    tintAct->setEnabled(false);
+
+//    temperatureAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::temperature);
+//    temperatureAct->setEnabled(false);
+
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
@@ -335,6 +346,8 @@ void ImageViewer::updateActions() {
     copyAct->setEnabled(!mat.empty());
     rotateAct->setEnabled(!mat.empty());
     colorAct->setEnabled(!mat.empty());
+    tintAct->setEnabled(!mat.empty());
+    temperatureAct->setEnabled(!mat.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -363,6 +376,19 @@ void ImageViewer::wheelEvent(QWheelEvent *event) {
         }
         event->accept();
     } else QWidget::wheelEvent(event);
+
+
+}
+
+void ImageViewer::tint() {
+    auto slider = new QSlider();
+    slider->setFocusPolicy(Qt::StrongFocus);
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(10);
+    slider->setSingleStep(1);
+    slider->setMinimum(-256);
+    slider->setMaximum(256);
+    slider->setValue(0);
 
 
 }

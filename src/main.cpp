@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     commandLineParser.addPositionalArgument(ImageViewer::tr("[file]"), ImageViewer::tr("Image file to open."));
     commandLineParser.process(QCoreApplication::arguments());
     ImageViewer imageViewer;
-    imageViewer.setWindowState(Qt::WindowMinimized);
+    imageViewer.setWindowState(Qt::WindowMaximized);
     if (!commandLineParser.positionalArguments().isEmpty()
         && !imageViewer.loadFile(commandLineParser.positionalArguments().front())) {
         return -1;
