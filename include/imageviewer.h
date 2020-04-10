@@ -62,10 +62,6 @@ private slots:
 
     void color();
 
-    void tint();
-
-    //void temperature();
-
     void zoomIn();
 
     void zoomOut();
@@ -105,8 +101,6 @@ private:
     QAction *copyAct;
     QAction *rotateAct;
     QAction *colorAct;
-    QAction *tintAct;
-    QAction *temperatureAct;
     QAction *zoomInAct;
     QAction *zoomOutAct;
     QAction *normalSizeAct;
