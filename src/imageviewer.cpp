@@ -40,6 +40,7 @@ ImageViewer::ImageViewer(QWidget *parent)
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     imageLabel->setScaledContents(true);
 
+
     /// dark theme
     // set style
     qApp->setStyle(QStyleFactory::create("Fusion"));
@@ -99,7 +100,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
     }
 
     setImage(newMat);
-
+    fitToWindow();
     setWindowFilePath(fileName);
 
     const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
@@ -118,9 +119,6 @@ void ImageViewer::setImage(const cv::Mat& newMat) {
     printAct->setEnabled(true);
     fitToWindowAct->setEnabled(true);
     updateActions();
-
-    if (!fitToWindowAct->isChecked())
-        imageLabel->adjustSize();
 }
 
 
@@ -258,11 +256,11 @@ void ImageViewer::normalSize() {
 }
 
 void ImageViewer::fitToWindow() {
-    bool fitToWindow = fitToWindowAct->isChecked();
-    scrollArea->setWidgetResizable(fitToWindow);
-    if (!fitToWindow)
-        normalSize();
-    updateActions();
+    QSize size = this->size();
+    QSize label_size = imageLabel->size();
+    std::cerr << "\n\n" << size.width() << " "  << label_size.width() << " " << size.height() << " " << label_size.height() << "\n\n";
+    double scale_factor = std::min((double) size.width() / label_size.width(), (double) size.height() / label_size.height());
+    scaleImage(scale_factor);
 }
 
 void ImageViewer::about() {
@@ -324,7 +322,6 @@ void ImageViewer::createActions() {
 
     fitToWindowAct = viewMenu->addAction(tr("&Fit to Window"), this, &ImageViewer::fitToWindow);
     fitToWindowAct->setEnabled(false);
-    fitToWindowAct->setCheckable(true);
     fitToWindowAct->setShortcut(tr("Ctrl+F"));
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -338,9 +335,6 @@ void ImageViewer::updateActions() {
     copyAct->setEnabled(!mat.empty());
     rotateAct->setEnabled(!mat.empty());
     colorAct->setEnabled(!mat.empty());
-    zoomInAct->setEnabled(!fitToWindowAct->isChecked());
-    zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
-    normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
 }
 
 void ImageViewer::scaleImage(double factor) {
