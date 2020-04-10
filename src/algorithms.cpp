@@ -19,12 +19,12 @@ cv::Mat takePicture(cv::VideoCapture cam) {
     return pic;
 }
 
-cv::Mat crop(const cv::Mat &img, int w, int h, int x, int y) {
+cv::Mat crop(const cv::Mat& img, int w, int h, int x, int y) {
     return img(cv::Rect(x, y, w, h));
 }
 
 
-cv::Mat rotate_in_frame(const cv::Mat &img, double angle) {
+cv::Mat rotate_in_frame(const cv::Mat& img, double angle) {
     // get rotation matrix for rotating the image around its center in pixel coordinates
     cv::Point2f center((img.cols - 1) / 2.0, (img.rows - 1) / 2.0);
     cv::Mat rot = cv::getRotationMatrix2D(center, angle, 1.0);
@@ -41,7 +41,7 @@ cv::Mat rotate_in_frame(const cv::Mat &img, double angle) {
     return dst;
 }
 
-cv::Mat saturate(const cv::Mat &img, int saturation, double scale) {
+cv::Mat saturate(const cv::Mat& img, int saturation, double scale) {
     // what it does here is dst = (uchar) ((double)src*scale+saturation);
     cv::Mat saturated;
 
@@ -53,7 +53,7 @@ cv::Mat saturate(const cv::Mat &img, int saturation, double scale) {
     return saturated;
 }
 
-cv::Mat brighten(const cv::Mat &img, int brightness, int contrast) {
+cv::Mat brighten(const cv::Mat& img, int brightness, int contrast) {
     cv::Mat saturated;
 
     // *(contrast/127 + 1) - contrast + brightness
@@ -64,32 +64,20 @@ cv::Mat brighten(const cv::Mat &img, int brightness, int contrast) {
 }
 
 
-cv::Mat gray(const cv::Mat &img) {
+cv::Mat gray(const cv::Mat& img) {
     cv::Mat bw;
     cvtColor(img, bw, cv::COLOR_RGB2GRAY);
     return bw;
 }
 
 
-cv::Mat pink(const cv::Mat &img) {
+cv::Mat pink(const cv::Mat& img) {
     cv::Mat pink;
     cvtColor(img, pink, cv::COLOR_YCrCb2RGB);
     return pink;
 }
 
-cv::Mat blue(const cv::Mat &img) {
-    cv::Mat blue(img), mask;
-    inRange(blue, Scalar(0, 0, 0), Scalar(0, 255, 0), mask);
-    return blue;
-}
-
-cv::Mat green(const cv::Mat &img) {
-    cv::Mat green(img), mask;
-    inRange(green, Scalar(0, 0, 0), Scalar(255, 0, 255), mask);
-    return green;
-}
-
-Mat Sharpen(const Mat &myImage) {
+cv::Mat Sharpen(const Mat& myImage) {
     CV_Assert(myImage.depth() == CV_8U);  // accept only uchar images
     Mat Result;
 
@@ -118,9 +106,19 @@ Mat Sharpen(const Mat &myImage) {
 }
 
 
-cv::Mat blend(const cv::Mat &img1, const cv::Mat &img2, double alpha) {
+cv::Mat blend(const cv::Mat& img1, const cv::Mat& img2, double alpha) {
     double beta = (1.0 - alpha);
     cv::Mat dst;
     addWeighted(img1, alpha, img2, beta, 0.0, dst);
     return dst;
+}
+
+
+cv::Mat tint(const cv::Mat& img, int value) {
+    return img + Scalar(0, value, 0);
+}
+
+
+cv::Mat temperature(const cv::Mat& img, int value) {
+    return img + Scalar(value, 0, value);
 }

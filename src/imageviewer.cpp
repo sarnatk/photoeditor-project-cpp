@@ -29,6 +29,7 @@
 #    include <QtWidgets/QStyleFactory>
 #    include <QtWidgets/QGraphicsView>
 #    include <QtWidgets/QInputDialog>
+#include <QtWidgets/QColorDialog>
 
 #  endif
 #endif
@@ -225,12 +226,18 @@ void ImageViewer::rotate() {
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Blue") << tr("Green") << tr("Pink") << tr("Black and White");
+    items << tr("Pink") << tr("Black and White");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
 
+/*
+ * qcolor dialog : TODO ?
+ *
+ *  QColor color = QColorDialog::getColor(Qt::yellow, this);
+ *  int r, g, b;
+ *  color.getRgb(&r, &g, &b);
+*/
+
     cv::Mat colored_mat;
-    if (item == "Blue") colored_mat = blue(mat);
-    if (item == "Green") colored_mat = green(mat);
     if (item == "Pink") colored_mat = pink(mat);
     if (item == "Black and White") colored_mat = gray(mat);
 

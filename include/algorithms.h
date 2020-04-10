@@ -21,6 +21,7 @@
  * take picture using camera
  *
  */
+
 cv::Mat takePicture(cv::VideoCapture cam);
 
 
@@ -30,14 +31,18 @@ cv::Mat takePicture(cv::VideoCapture cam);
  * result with width = w, height = h
  *
 */
+
 cv::Mat crop(const cv::Mat &img, int w, int h, int x = 0, int y = 0);
+
 
 /*
  *
  * rotates image by given angle without crop
  *
  */
+
 cv::Mat rotate_in_frame(const cv::Mat &img, double angle);
+
 
 /*
  *
@@ -52,41 +57,34 @@ cv::Mat saturate(const cv::Mat &img, int saturation, double scale = 1);
  * brightens image
  *
  */
+
 cv::Mat brighten(const cv::Mat &img, int brightness = 0, int contrast = 0);
+
 
 /*
  *
  * black and white filter
  *
  */
+
 cv::Mat gray(const cv::Mat &img);
+
 
 /*
  *
  * pink filter
  *
  */
+
 cv::Mat pink(const cv::Mat &img);
 
-/*
- *
- * blue filter
- *
- */
-cv::Mat blue(const cv::Mat &img);
-
-/*
- *
- * green filter
- *
- */
-cv::Mat green(const cv::Mat &img);
 
 /*
  *
  * blends two images with given ratio
  *
  */
+
 cv::Mat blend(const cv::Mat &img1, const cv::Mat &img2, double alpha);
 
 
@@ -96,5 +94,23 @@ cv::Mat blend(const cv::Mat &img1, const cv::Mat &img2, double alpha);
  *
  */
 cv::Mat Sharpen(const cv::Mat& myImage);
+
+
+/*
+ *
+ * tint
+ *
+ */
+
+cv::Mat tint(const cv::Mat& img, int value);
+
+
+/*
+ *
+ *  changes color temperature
+ *
+ */
+
+cv::Mat temperature(const cv::Mat& img, int value);
 
 #endif //OPENCVTEST_ALGORITHMS_H
