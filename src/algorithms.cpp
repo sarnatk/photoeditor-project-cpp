@@ -120,5 +120,5 @@ cv::Mat tint(const cv::Mat& img, int value) {
 
 
 cv::Mat temperature(const cv::Mat& img, int value) {
-    return img + Scalar(value, 0, value);
+    return img + Scalar(-value, 0, value);
 }
