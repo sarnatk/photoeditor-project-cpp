@@ -64,7 +64,7 @@ private slots:
 
     void tint();
 
-    //void temperature();
+    void temperature();
 
     void zoomIn();
 
