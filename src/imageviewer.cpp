@@ -99,6 +99,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
         return false;
     }
 
+    // remember and show image
     setImage(newMat);
 
     setWindowFilePath(fileName);
@@ -265,6 +266,8 @@ void ImageViewer::normalSize() {
 void ImageViewer::fitToWindow() {
     QSize size = scrollArea->size();
     QSize label_size = imageLabel->size();
+
+    // get factor to scale for
     double scale_factor = std::min((double) size.width() / label_size.width(), (double) (size.height() - 35) / label_size.height());
 
     scaleImage(scale_factor);
@@ -382,7 +385,6 @@ void ImageViewer::wheelEvent(QWheelEvent *event) {
 }
 
 void ImageViewer::tint() {
-    ;
     /*auto slider = new QSlider();
     slider->setFocusPolicy(Qt::StrongFocus);
     slider->setTickPosition(QSlider::TicksBothSides);
@@ -395,7 +397,6 @@ void ImageViewer::tint() {
 }
 
 void ImageViewer::temperature() {
-    ;
     /*
     auto slider = new QSlider();
     slider->setFocusPolicy(Qt::StrongFocus);
