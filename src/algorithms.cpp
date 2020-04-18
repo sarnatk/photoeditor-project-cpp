@@ -46,7 +46,7 @@ cv::Mat rotate_in_frame(const cv::Mat& img, double angle) {
     return dst;
 }
 
-cv::Mat hsv_add_scalar(const cv::Mat& img, int h, int s = 0, int v = 0) {
+cv::Mat hsv_add_scalar(const cv::Mat& img, int h, int s, int v) {
 
     cv::Mat res;
 
