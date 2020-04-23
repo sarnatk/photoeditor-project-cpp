@@ -29,6 +29,8 @@
 #    include <QtWidgets/QStyleFactory>
 #    include <QtWidgets/QGraphicsView>
 #    include <QtWidgets/QInputDialog>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QSlider>
 
 #  endif
 #endif
@@ -97,6 +99,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
         return false;
     }
 
+    // remember and show image
     setImage(newMat);
 
     setWindowFilePath(fileName);
@@ -116,10 +119,14 @@ void ImageViewer::setImage(const cv::Mat& newMat) {
     scrollArea->setVisible(true);
     printAct->setEnabled(true);
     fitToWindowAct->setEnabled(true);
+    zoomInAct->setEnabled(true);
+    zoomOutAct->setEnabled(true);
+    normalSizeAct->setEnabled(true);
+
     updateActions();
 
-    if (!fitToWindowAct->isChecked())
-        imageLabel->adjustSize();
+    imageLabel->adjustSize();
+    fitToWindow();
 }
 
 
@@ -225,12 +232,18 @@ void ImageViewer::rotate() {
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Blue") << tr("Green") << tr("Pink") << tr("Black and White");
+    items << tr("Pink") << tr("Black and White");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
 
+/*
+ * qcolor dialog : TODO ?
+ *
+ *  QColor color = QColorDialog::getColor(Qt::yellow, this);
+ *  int r, g, b;
+ *  color.getRgb(&r, &g, &b);
+*/
+
     cv::Mat colored_mat;
-    if (item == "Blue") colored_mat = blue(mat);
-    if (item == "Green") colored_mat = green(mat);
     if (item == "Pink") colored_mat = pink(mat);
     if (item == "Black and White") colored_mat = gray(mat);
 
@@ -251,11 +264,13 @@ void ImageViewer::normalSize() {
 }
 
 void ImageViewer::fitToWindow() {
-    bool fitToWindow = fitToWindowAct->isChecked();
-    scrollArea->setWidgetResizable(fitToWindow);
-    if (!fitToWindow)
-        normalSize();
-    updateActions();
+    QSize size = scrollArea->size();
+    QSize label_size = imageLabel->size();
+
+    // get factor to scale for
+    double scale_factor = std::min((double) size.width() / label_size.width(), (double) (size.height() - 35) / label_size.height());
+
+    scaleImage(scale_factor);
 }
 
 void ImageViewer::about() {
@@ -299,6 +314,13 @@ void ImageViewer::createActions() {
     colorAct = editMenu->addAction(tr("Color"), this, &ImageViewer::color);
     colorAct->setEnabled(false);
 
+
+    tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::tint);
+    tintAct->setEnabled(false);
+
+    temperatureAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::temperature);
+    temperatureAct->setEnabled(false);
+
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
@@ -317,7 +339,6 @@ void ImageViewer::createActions() {
 
     fitToWindowAct = viewMenu->addAction(tr("&Fit to Window"), this, &ImageViewer::fitToWindow);
     fitToWindowAct->setEnabled(false);
-    fitToWindowAct->setCheckable(true);
     fitToWindowAct->setShortcut(tr("Ctrl+F"));
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -331,9 +352,8 @@ void ImageViewer::updateActions() {
     copyAct->setEnabled(!mat.empty());
     rotateAct->setEnabled(!mat.empty());
     colorAct->setEnabled(!mat.empty());
-    zoomInAct->setEnabled(!fitToWindowAct->isChecked());
-    zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
-    normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
+    tintAct->setEnabled(!mat.empty());
+    temperatureAct->setEnabled(!mat.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -362,6 +382,28 @@ void ImageViewer::wheelEvent(QWheelEvent *event) {
         }
         event->accept();
     } else QWidget::wheelEvent(event);
+}
 
+void ImageViewer::tint() {
+    /*auto slider = new QSlider();
+    slider->setFocusPolicy(Qt::StrongFocus);
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(10);
+    slider->setSingleStep(1);
+    slider->setMinimum(-256);
+    slider->setMaximum(256);
+    slider->setValue(0);*/
 
+}
+
+void ImageViewer::temperature() {
+    /*
+    auto slider = new QSlider();
+    slider->setFocusPolicy(Qt::StrongFocus);
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(10);
+    slider->setSingleStep(1);
+    slider->setMinimum(-256);
+    slider->setMaximum(256);
+    slider->setValue(0);*/
 }

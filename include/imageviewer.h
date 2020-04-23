@@ -62,6 +62,10 @@ private slots:
 
     void color();
 
+    void tint();
+
+    void temperature();
+
     void zoomIn();
 
     void zoomOut();
@@ -71,22 +75,6 @@ private slots:
     void fitToWindow();
 
     void about();
-
-private:
-    QImage to_QImage(cv::Mat const &src) {
-        QImage dest((const uchar *) src.data, src.cols, src.rows, src.step, QImage::Format_RGB888);
-        dest.bits();
-        return dest;
-    }
-
-    // ПРОБЛЕМЫ ЗДЕСЬ (возможно дело в CV_8UC4, но может и нет)
-    cv::Mat to_mat(QImage const &inImage) {
-        cv::Mat mat(inImage.height(), inImage.width(), CV_8UC4, const_cast<uchar *>(inImage.bits()),
-                    static_cast<size_t>(inImage.bytesPerLine()));
-        cv::Mat matNoAlpha;
-        cv::cvtColor(mat, matNoAlpha, cv::COLOR_BGRA2BGR);   // drop the all-white alpha channel
-        return matNoAlpha;
-    }
 
 private:
     void createActions();
@@ -117,6 +105,8 @@ private:
     QAction *copyAct;
     QAction *rotateAct;
     QAction *colorAct;
+    QAction *tintAct;
+    QAction *temperatureAct;
     QAction *zoomInAct;
     QAction *zoomOutAct;
     QAction *normalSizeAct;
