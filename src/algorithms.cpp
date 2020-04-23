@@ -125,24 +125,13 @@ cv::Mat lab_add_scalar(const cv::Mat& img, int l, int a, int b) {
 
 
 cv::Mat gray(const cv::Mat& img) {
-
     cv::Mat bw;
 
     // black & white filter
-    cvtColor(img, bw, cv::COLOR_RGB2GRAY);
+    cvtColor(img, bw, cv::COLOR_BGR2GRAY);
+    cvtColor(bw, img, cv::COLOR_GRAY2BGR);
 
-    return bw;
-}
-
-
-cv::Mat pink(const cv::Mat& img) {
-
-    cv::Mat pink;
-
-    // convert to another color space: it gets pink
-    cvtColor(img, pink, cv::COLOR_YCrCb2RGB);
-
-    return pink;
+    return img;
 }
 
 

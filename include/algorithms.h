@@ -121,15 +121,6 @@ cv::Mat gray(const cv::Mat& img);
 
 /*
  *
- * pink filter
- *
- */
-
-cv::Mat pink(const cv::Mat& img);
-
-
-/*
- *
  * blends two images with given ratio
  *
  */

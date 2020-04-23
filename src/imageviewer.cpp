@@ -238,7 +238,7 @@ void ImageViewer::rotate() {
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Pink") << tr("Black and White") << tr("Red") << tr("Green") << tr("Blue");
+    items << tr("Black and White");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
 
 /*
@@ -250,7 +250,6 @@ void ImageViewer::color() {
 */
 
     cv::Mat colored_mat;
-    if (item == "Pink") colored_mat = pink(mat);
     if (item == "Black and White") colored_mat = gray(mat);
 
     setImage(colored_mat);

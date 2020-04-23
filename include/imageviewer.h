@@ -8,7 +8,7 @@
 #include <QPixmap>
 #include <QtGlobal>
 
-#include <kImageAnnotator/KImageAnnotator.h>
+//#include <kImageAnnotator/KImageAnnotator.h>
 
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
@@ -118,7 +118,7 @@ private:
     QAction *normalSizeAct;
     QAction *fitToWindowAct;
     CaptureUploader *mCaptureUploader;
-    kImageAnnotator::KImageAnnotator *mKImageAnnotator;
+    //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
 
 };
 
