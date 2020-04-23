@@ -214,3 +214,8 @@ cv::Mat transform_perspective(const cv::Mat& input, Point2f outputQuad[4]) {
 
     return res;
 }
+
+cv::Mat apply_color(const cv::Mat& mat, int r, int g, int b, double alpha) {
+    cv::Mat m(mat.rows, mat.cols, CV_8UC3, cv::Scalar(b, g, r));
+    return blend(mat, m, 1 - alpha);
+}

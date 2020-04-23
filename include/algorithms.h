@@ -125,7 +125,7 @@ cv::Mat gray(const cv::Mat& img);
  *
  */
 
-cv::Mat blend(const cv::Mat& img1, const cv::Mat& img2, double alpha);
+cv::Mat blend(const cv::Mat& img1, const cv::Mat& img2, double alpha = 0.5);
 
 
 /*
@@ -164,5 +164,15 @@ cv::Mat blur(const cv::Mat& img, double value = 3);
  */
 
 cv::Mat sharpen(const cv::Mat& img, double value = 0.5);
+
+
+/*
+ *
+ * blend image with given
+ * rgb color
+ *
+ */
+
+cv::Mat apply_color(const cv::Mat& mat, int r, int g, int b, double alpha);
 
 #endif //OPENCVTEST_ALGORITHMS_H

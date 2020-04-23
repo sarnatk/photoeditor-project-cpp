@@ -119,7 +119,6 @@ private:
     QAction *fitToWindowAct;
     CaptureUploader *mCaptureUploader;
     //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
-
 };
 
 #endif

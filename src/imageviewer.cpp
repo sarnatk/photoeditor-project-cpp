@@ -35,7 +35,7 @@
 #  endif
 #endif
 
-ImageViewer::ImageViewer(QWidget *parent)
+ImageViewer::ImageViewer(QWidget* parent)
         : QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea) {
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -87,7 +87,7 @@ ImageViewer::ImageViewer(QWidget *parent)
 }
 
 
-bool ImageViewer::loadFile(const QString &fileName) {
+bool ImageViewer::loadFile(const QString& fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
 
@@ -110,7 +110,7 @@ bool ImageViewer::loadFile(const QString &fileName) {
     return true;
 }
 
-void ImageViewer::setImage(const cv::Mat &newMat) {
+void ImageViewer::setImage(const cv::Mat& newMat) {
     mat = newMat;
 
     imageLabel->setPixmap(cvMatToQPixmap(mat));
@@ -130,7 +130,7 @@ void ImageViewer::setImage(const cv::Mat &newMat) {
 }
 
 
-bool ImageViewer::saveFile(const QString &fileName) {
+bool ImageViewer::saveFile(const QString& fileName) {
     std::cerr << "\n\nin SaveFile\n\n";
 
     QImageWriter writer(fileName);
@@ -151,7 +151,7 @@ bool ImageViewer::saveFile(const QString &fileName) {
 void ImageViewer::open() {
     QList<QByteArray> formats = QImageReader::supportedImageFormats();
     QStringList list;
-    for (auto &fmt : formats)
+    for (auto& fmt : formats)
         list.append("*." + QString(fmt));
     auto filter = "Images (" + list.join(" ") + ")";
 
@@ -203,7 +203,7 @@ void ImageViewer::copy() {
 #ifndef QT_NO_CLIPBOARD
 
 static QImage clipboardImage() {
-    if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData()) {
+    if (const QMimeData* mimeData = QGuiApplication::clipboard()->mimeData()) {
         if (mimeData->hasImage()) {
             const auto image = qvariant_cast<QImage>(mimeData->imageData());
             if (!image.isNull())
@@ -238,19 +238,20 @@ void ImageViewer::rotate() {
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Black and White");
+    items << tr("Black and White") << tr("Colors");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
 
-/*
- * qcolor dialog : TODO ?
- *
- *  QColor color = QColorDialog::getColor(Qt::yellow, this);
- *  int r, g, b;
- *  color.getRgb(&r, &g, &b);
-*/
 
     cv::Mat colored_mat;
     if (item == "Black and White") colored_mat = gray(mat);
+    else if (item == "Colors") {
+        QColor color = QColorDialog::getColor(Qt::yellow, this);
+        double alpha = QInputDialog::getDouble(this, tr("Colors"), tr("Intensity"), 0, 0, 1);
+        int r, g, b;
+        color.getRgb(&r, &g, &b);
+
+        colored_mat = apply_color(mat, r, g, b, alpha);
+    }
 
     setImage(colored_mat);
 }
@@ -305,9 +306,9 @@ void ImageViewer::about() {
 }
 
 void ImageViewer::createActions() {
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
 
-    QAction *openAct = fileMenu->addAction(tr("&Open..."), this, &ImageViewer::open);
+    QAction* openAct = fileMenu->addAction(tr("&Open..."), this, &ImageViewer::open);
     openAct->setShortcut(QKeySequence::Open);
 
     saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::saveAs);
@@ -325,16 +326,16 @@ void ImageViewer::createActions() {
 
     fileMenu->addSeparator();
 
-    QAction *exitAct = fileMenu->addAction(tr("E&xit"), this, &QWidget::close);
+    QAction* exitAct = fileMenu->addAction(tr("E&xit"), this, &QWidget::close);
     exitAct->setShortcut(tr("Ctrl+Q"));
 
-    QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
 
     copyAct = editMenu->addAction(tr("&Copy"), this, &ImageViewer::copy);
     copyAct->setShortcut(QKeySequence::Copy);
     copyAct->setEnabled(false);
 
-    QAction *pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
+    QAction* pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
     pasteAct->setShortcut(QKeySequence::Paste);
 
     rotateAct = editMenu->addAction(tr("&Rotate"), this, &ImageViewer::rotate);
@@ -351,7 +352,7 @@ void ImageViewer::createActions() {
     temperatureAct = editMenu->addAction(tr("Temperature"), this, &ImageViewer::applyTemperature);
     temperatureAct->setEnabled(false);
 
-    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+    QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
     zoomInAct->setShortcut(tr("Ctrl+="));
@@ -371,7 +372,7 @@ void ImageViewer::createActions() {
     fitToWindowAct->setEnabled(false);
     fitToWindowAct->setShortcut(tr("Ctrl+F"));
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+    QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
 
     helpMenu->addAction(tr("&About"), this, &ImageViewer::about);
     helpMenu->addAction(tr("About &Qt"), &QApplication::aboutQt);
@@ -399,12 +400,12 @@ void ImageViewer::scaleImage(double factor) {
     zoomOutAct->setEnabled(scaleFactor > 0.333);
 }
 
-void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor) {
+void ImageViewer::adjustScrollBar(QScrollBar* scrollBar, double factor) {
     scrollBar->setValue(int(factor * scrollBar->value()
                             + ((factor - 1) * scrollBar->pageStep() / 2)));
 }
 
-void ImageViewer::wheelEvent(QWheelEvent *event) {
+void ImageViewer::wheelEvent(QWheelEvent* event) {
     if (event->modifiers().testFlag(Qt::ControlModifier)) {
         if (event->delta() > 0) {
             scaleImage(1.05);
@@ -414,29 +415,3 @@ void ImageViewer::wheelEvent(QWheelEvent *event) {
         event->accept();
     } else QWidget::wheelEvent(event);
 }
-
-/*
-
-void ImageViewer::tint() {
-    auto slider = new QSlider();
-    slider->setFocusPolicy(Qt::StrongFocus);
-    slider->setTickPosition(QSlider::TicksBothSides);
-    slider->setTickInterval(10);
-    slider->setSingleStep(1);
-    slider->setMinimum(-256);
-    slider->setMaximum(256);
-    slider->setValue(0);
-
-}
-
-void ImageViewer::temperature() {
-    auto slider = new QSlider();
-    slider->setFocusPolicy(Qt::StrongFocus);
-    slider->setTickPosition(QSlider::TicksBothSides);
-    slider->setTickInterval(10);
-    slider->setSingleStep(1);
-    slider->setMinimum(-256);
-    slider->setMaximum(256);
-    slider->setValue(0);
-}
-*/
