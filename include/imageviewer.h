@@ -8,8 +8,11 @@
 #include <QPixmap>
 #include <QtGlobal>
 
+#include <kImageAnnotator/KImageAnnotator.h>
+
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
+#include "imgur.h"
 
 #if defined(QT_PRINTSUPPORT_LIB)
 
@@ -52,6 +55,8 @@ private slots:
 
     void saveAs();
 
+    void upload();
+
     void print();
 
     void copy();
@@ -62,9 +67,9 @@ private slots:
 
     void color();
 
-    void tint();
+    void applyTint();
 
-    void temperature();
+    void applyTemperature();
 
     void zoomIn();
 
@@ -101,6 +106,7 @@ private:
 #endif
 
     QAction *saveAsAct;
+    QAction *uploadToImgurAct;
     QAction *printAct;
     QAction *copyAct;
     QAction *rotateAct;
@@ -111,6 +117,9 @@ private:
     QAction *zoomOutAct;
     QAction *normalSizeAct;
     QAction *fitToWindowAct;
+    CaptureUploader *mCaptureUploader;
+    kImageAnnotator::KImageAnnotator *mKImageAnnotator;
+
 };
 
 #endif

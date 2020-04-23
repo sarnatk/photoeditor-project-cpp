@@ -87,7 +87,7 @@ ImageViewer::ImageViewer(QWidget *parent)
 }
 
 
-bool ImageViewer::loadFile(const QString& fileName) {
+bool ImageViewer::loadFile(const QString &fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
 
@@ -110,7 +110,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
     return true;
 }
 
-void ImageViewer::setImage(const cv::Mat& newMat) {
+void ImageViewer::setImage(const cv::Mat &newMat) {
     mat = newMat;
 
     imageLabel->setPixmap(cvMatToQPixmap(mat));
@@ -130,7 +130,7 @@ void ImageViewer::setImage(const cv::Mat& newMat) {
 }
 
 
-bool ImageViewer::saveFile(const QString& fileName) {
+bool ImageViewer::saveFile(const QString &fileName) {
     std::cerr << "\n\nin SaveFile\n\n";
 
     QImageWriter writer(fileName);
@@ -151,7 +151,7 @@ bool ImageViewer::saveFile(const QString& fileName) {
 void ImageViewer::open() {
     QList<QByteArray> formats = QImageReader::supportedImageFormats();
     QStringList list;
-    for (auto& fmt : formats)
+    for (auto &fmt : formats)
         list.append("*." + QString(fmt));
     auto filter = "Images (" + list.join(" ") + ")";
 
@@ -170,6 +170,12 @@ void ImageViewer::saveAs() {
                                                     tr("Images (*.png *jpg *jpeg *bmp)"));
 
     while (!saveFile(fileName)) {}
+}
+
+void ImageViewer::upload() {
+    QImage image = cvMatToQImage(mat); //mKImageAnnotator->image(); ??????????WHYYYYYY WHY WHYYYY D:
+    UploadOperation operation(image, mCaptureUploader);
+    operation.execute();
 }
 
 void ImageViewer::print() {
@@ -232,7 +238,7 @@ void ImageViewer::rotate() {
 
 void ImageViewer::color() {
     QStringList items;
-    items << tr("Pink") << tr("Black and White");
+    items << tr("Pink") << tr("Black and White") << tr("Red") << tr("Green") << tr("Blue");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
 
 /*
@@ -248,6 +254,24 @@ void ImageViewer::color() {
     if (item == "Black and White") colored_mat = gray(mat);
 
     setImage(colored_mat);
+}
+
+void ImageViewer::applyTint() {
+    int ratio = QInputDialog::getInt(this, tr("Tint"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat tinted_mat;
+    tinted_mat = tint(mat, ratio);
+
+    setImage(tinted_mat);
+}
+
+void ImageViewer::applyTemperature() {
+    int degree = QInputDialog::getInt(this, tr("Temperature"), tr("Degree:"), 0, -256, 256);
+
+    cv::Mat hot_mat;
+    hot_mat = temperature(mat, degree);
+
+    setImage(hot_mat);
 }
 
 void ImageViewer::zoomIn() {
@@ -268,7 +292,8 @@ void ImageViewer::fitToWindow() {
     QSize label_size = imageLabel->size();
 
     // get factor to scale for
-    double scale_factor = std::min((double) size.width() / label_size.width(), (double) (size.height() - 35) / label_size.height());
+    double scale_factor = std::min((double) size.width() / label_size.width(),
+                                   (double) (size.height() - 35) / label_size.height());
 
     scaleImage(scale_factor);
 }
@@ -295,6 +320,12 @@ void ImageViewer::createActions() {
 
     fileMenu->addSeparator();
 
+    uploadToImgurAct = fileMenu->addAction(tr("Upload to &Imgur..."), this, &ImageViewer::upload);
+    uploadToImgurAct->setShortcut(tr("Ctrl+I"));
+    uploadToImgurAct->setEnabled(false);
+
+    fileMenu->addSeparator();
+
     QAction *exitAct = fileMenu->addAction(tr("E&xit"), this, &QWidget::close);
     exitAct->setShortcut(tr("Ctrl+Q"));
 
@@ -315,10 +346,10 @@ void ImageViewer::createActions() {
     colorAct->setEnabled(false);
 
 
-    tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::tint);
+    tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::applyTint);
     tintAct->setEnabled(false);
 
-    temperatureAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::temperature);
+    temperatureAct = editMenu->addAction(tr("Temperature"), this, &ImageViewer::applyTemperature);
     temperatureAct->setEnabled(false);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
@@ -350,6 +381,7 @@ void ImageViewer::createActions() {
 void ImageViewer::updateActions() {
     saveAsAct->setEnabled(!mat.empty());
     copyAct->setEnabled(!mat.empty());
+    uploadToImgurAct->setEnabled(!mat.empty());
     rotateAct->setEnabled(!mat.empty());
     colorAct->setEnabled(!mat.empty());
     tintAct->setEnabled(!mat.empty());
@@ -384,20 +416,9 @@ void ImageViewer::wheelEvent(QWheelEvent *event) {
     } else QWidget::wheelEvent(event);
 }
 
+/*
+
 void ImageViewer::tint() {
-    /*auto slider = new QSlider();
-    slider->setFocusPolicy(Qt::StrongFocus);
-    slider->setTickPosition(QSlider::TicksBothSides);
-    slider->setTickInterval(10);
-    slider->setSingleStep(1);
-    slider->setMinimum(-256);
-    slider->setMaximum(256);
-    slider->setValue(0);*/
-
-}
-
-void ImageViewer::temperature() {
-    /*
     auto slider = new QSlider();
     slider->setFocusPolicy(Qt::StrongFocus);
     slider->setTickPosition(QSlider::TicksBothSides);
@@ -405,5 +426,18 @@ void ImageViewer::temperature() {
     slider->setSingleStep(1);
     slider->setMinimum(-256);
     slider->setMaximum(256);
-    slider->setValue(0);*/
+    slider->setValue(0);
+
 }
+
+void ImageViewer::temperature() {
+    auto slider = new QSlider();
+    slider->setFocusPolicy(Qt::StrongFocus);
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(10);
+    slider->setSingleStep(1);
+    slider->setMinimum(-256);
+    slider->setMaximum(256);
+    slider->setValue(0);
+}
+*/
