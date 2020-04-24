@@ -245,8 +245,8 @@ void ImageViewer::color() {
     cv::Mat colored_mat;
     if (item == "Black and White") colored_mat = gray(mat);
     else if (item == "Colors") {
-        QColor color = QColorDialog::getColor(Qt::yellow, this);
-        double alpha = QInputDialog::getDouble(this, tr("Colors"), tr("Intensity"), 0, 0, 1);
+        QColor color = QColorDialog::getColor(Qt::magenta, this);
+        double alpha = QInputDialog::getDouble(this, tr("Colors"), tr("Intensity"), 0, 0, 1, 3);
         int r, g, b;
         color.getRgb(&r, &g, &b);
 
@@ -273,6 +273,14 @@ void ImageViewer::applyTemperature() {
 
     setImage(hot_mat);
 }
+
+
+void ImageViewer::applySharp() {
+    double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
+
+    setImage(sharpen(mat, degree));
+}
+
 
 void ImageViewer::zoomIn() {
     scaleImage(1.25);
@@ -349,8 +357,27 @@ void ImageViewer::createActions() {
     tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::applyTint);
     tintAct->setEnabled(false);
 
+    brightenAct = editMenu->addAction(tr("Brightness"), this, &ImageViewer::applyBright);
+    brightenAct->setEnabled(false);
+
+    lightenAct = editMenu->addAction(tr("Lightness"), this, &ImageViewer::applyLight);
+    lightenAct->setEnabled(false);
+
+    contrastAct = editMenu->addAction(tr("Contrast"), this, &ImageViewer::applyContrast);
+    contrastAct->setEnabled(false);
+
+    saturationAct = editMenu->addAction(tr("Saturation"), this, &ImageViewer::applySaturation);
+    saturationAct->setEnabled(false);
+
+    hueAct = editMenu->addAction(tr("Hue"), this, &ImageViewer::applyHue);
+    hueAct->setEnabled(false);
+
+
     temperatureAct = editMenu->addAction(tr("Temperature"), this, &ImageViewer::applyTemperature);
     temperatureAct->setEnabled(false);
+
+    sharpenAct = editMenu->addAction(tr("Sharpen"), this, &ImageViewer::applySharp);
+    sharpenAct->setEnabled(false);
 
     QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
 
@@ -386,6 +413,12 @@ void ImageViewer::updateActions() {
     colorAct->setEnabled(!mat.empty());
     tintAct->setEnabled(!mat.empty());
     temperatureAct->setEnabled(!mat.empty());
+    sharpenAct->setEnabled(!mat.empty());
+    brightenAct->setEnabled(!mat.empty());
+    lightenAct->setEnabled(!mat.empty());
+    hueAct->setEnabled(!mat.empty());
+    saturationAct->setEnabled(!mat.empty());
+    contrastAct->setEnabled(!mat.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -414,4 +447,49 @@ void ImageViewer::wheelEvent(QWheelEvent* event) {
         }
         event->accept();
     } else QWidget::wheelEvent(event);
+}
+
+void ImageViewer::applySaturation() {
+    int ratio = QInputDialog::getInt(this, tr("Saturation"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat res;
+    res = saturate(mat, ratio);
+
+    setImage(res);
+}
+
+void ImageViewer::applyBright() {
+    int ratio = QInputDialog::getInt(this, tr("Brightness"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat res;
+    res = brighten(mat, ratio);
+
+    setImage(res);
+}
+
+void ImageViewer::applyLight() {
+    int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat res;
+    res = lighten(mat, ratio);
+
+    setImage(res);
+}
+
+void ImageViewer::applyHue() {
+    int ratio = QInputDialog::getInt(this, tr("Hue"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat res;
+    res = hue(mat, ratio);
+
+    setImage(res);
+}
+
+void ImageViewer::applyContrast() {
+    int ratio = QInputDialog::getInt(this, tr("Contrast"), tr("Rate:"), 0, -256, 256);
+
+    cv::Mat res;
+    res = contrast(mat, ratio);
+
+    setImage(res);
 }

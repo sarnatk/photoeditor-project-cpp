@@ -69,7 +69,19 @@ private slots:
 
     void applyTint();
 
+    void applySaturation();
+
+    void applyBright();
+
+    void applyLight();
+
+    void applyHue();
+
+    void applyContrast();
+
     void applyTemperature();
+
+    void applySharp();
 
     void zoomIn();
 
@@ -112,7 +124,13 @@ private:
     QAction *rotateAct;
     QAction *colorAct;
     QAction *tintAct;
+    QAction *saturationAct;
+    QAction *brightenAct;
+    QAction *lightenAct;
+    QAction *contrastAct;
+    QAction *hueAct;
     QAction *temperatureAct;
+    QAction *sharpenAct;
     QAction *zoomInAct;
     QAction *zoomOutAct;
     QAction *normalSizeAct;
