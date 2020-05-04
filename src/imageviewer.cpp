@@ -91,29 +91,31 @@ bool ImageViewer::loadFile(const QString& fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
 
-    cv::Mat newMat = cv::imread(fileName.toStdString());
-    if (newMat.empty()) {
+    cv::Mat new_image = cv::imread(fileName.toStdString());
+    if (new_image.empty()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot load %1: %2")
                                          .arg(QDir::toNativeSeparators(fileName), reader.errorString()));
         return false;
     }
 
-    // remember and show image
-    setImage(newMat);
-
     setWindowFilePath(fileName);
 
     const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
-            .arg(QDir::toNativeSeparators(fileName)).arg(mat.cols).arg(mat.rows).arg(mat.depth());
+            .arg(QDir::toNativeSeparators(fileName)).arg(image.cols).arg(image.rows).arg(image.depth());
     statusBar()->showMessage(message);
+
+    controller.open_image(new_image);
+    // remember and show image
+    setImage(new_image);
+
     return true;
 }
 
-void ImageViewer::setImage(const cv::Mat& newMat) {
-    mat = newMat;
+void ImageViewer::setImage(const cv::Mat& new_image) {
+    image = new_image;
 
-    imageLabel->setPixmap(cvMatToQPixmap(mat));
+    imageLabel->setPixmap(cvMatToQPixmap(image));
     scaleFactor = 1.0;
 
     scrollArea->setVisible(true);
@@ -131,12 +133,9 @@ void ImageViewer::setImage(const cv::Mat& newMat) {
 
 
 bool ImageViewer::saveFile(const QString& fileName) {
-    std::cerr << "\n\nin SaveFile\n\n";
-
     QImageWriter writer(fileName);
 
-
-    if (!imwrite(fileName.toStdString(), mat)) {
+    if (!imwrite(fileName.toStdString(), image)) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot write %1: %2")
                                          .arg(QDir::toNativeSeparators(fileName)), writer.errorString());
@@ -164,7 +163,7 @@ void ImageViewer::open() {
 
 }
 
-void ImageViewer::saveAs() {
+void ImageViewer::save_as() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File As"),
                                                     QString(),
                                                     tr("Images (*.png *jpg *jpeg *bmp)"));
@@ -173,8 +172,8 @@ void ImageViewer::saveAs() {
 }
 
 void ImageViewer::upload() {
-    QImage image = cvMatToQImage(mat); //mKImageAnnotator->image(); ??????????WHYYYYYY WHY WHYYYY D:
-    UploadOperation operation(image, mCaptureUploader);
+    QImage q_image = cvMatToQImage(image); //mKImageAnnotator->image(); ??????????WHYYYYYY WHY WHYYYY D:
+    UploadOperation operation(q_image, mCaptureUploader);
     operation.execute();
 }
 
@@ -196,7 +195,7 @@ void ImageViewer::print() {
 
 void ImageViewer::copy() {
 #ifndef QT_NO_CLIPBOARD
-    QGuiApplication::clipboard()->setImage(cvMatToQImage(mat));
+    QGuiApplication::clipboard()->setImage(cvMatToQImage(image));
 #endif // !QT_NO_CLIPBOARD
 }
 
@@ -221,64 +220,13 @@ void ImageViewer::paste() {
     if (newImage.isNull()) {
         statusBar()->showMessage(tr("No image in clipboard"));
     } else {
-        setImage(mat);
+        setImage(image);
         setWindowFilePath(QString());
         const QString message = tr("Obtained image from clipboard, %1x%2, Depth: %3")
                 .arg(newImage.width()).arg(newImage.height()).arg(newImage.depth());
         statusBar()->showMessage(message);
     }
 #endif // !QT_NO_CLIPBOARD
-}
-
-void ImageViewer::rotate() {
-    double angle = QInputDialog::getDouble(this, tr("Rotate"), tr("Angle:"), 0, 0, 360, 0);
-
-    setImage(rotate_in_frame(mat, angle));
-}
-
-void ImageViewer::color() {
-    QStringList items;
-    items << tr("Black and White") << tr("Colors");
-    QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
-
-
-    cv::Mat colored_mat;
-    if (item == "Black and White") colored_mat = gray(mat);
-    else if (item == "Colors") {
-        QColor color = QColorDialog::getColor(Qt::magenta, this);
-        double alpha = QInputDialog::getDouble(this, tr("Colors"), tr("Intensity"), 0, 0, 1, 3);
-        int r, g, b;
-        color.getRgb(&r, &g, &b);
-
-        colored_mat = apply_color(mat, r, g, b, alpha);
-    }
-
-    setImage(colored_mat);
-}
-
-void ImageViewer::applyTint() {
-    int ratio = QInputDialog::getInt(this, tr("Tint"), tr("Rate:"), 0, -256, 256);
-
-    cv::Mat tinted_mat;
-    tinted_mat = tint(mat, ratio);
-
-    setImage(tinted_mat);
-}
-
-void ImageViewer::applyTemperature() {
-    int degree = QInputDialog::getInt(this, tr("Temperature"), tr("Degree:"), 0, -256, 256);
-
-    cv::Mat hot_mat;
-    hot_mat = temperature(mat, degree);
-
-    setImage(hot_mat);
-}
-
-
-void ImageViewer::applySharp() {
-    double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
-
-    setImage(sharpen(mat, degree));
 }
 
 
@@ -319,7 +267,10 @@ void ImageViewer::createActions() {
     QAction* openAct = fileMenu->addAction(tr("&Open..."), this, &ImageViewer::open);
     openAct->setShortcut(QKeySequence::Open);
 
-    saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::saveAs);
+    undoAct = fileMenu->addAction(tr("&Undo"), this, &ImageViewer::undo);
+    redoAct = fileMenu->addAction(tr("&Redo"), this, &ImageViewer::redo);
+
+    saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::save_as);
     saveAsAct->setEnabled(false);
 
     printAct = fileMenu->addAction(tr("&Print..."), this, &ImageViewer::print);
@@ -406,19 +357,21 @@ void ImageViewer::createActions() {
 }
 
 void ImageViewer::updateActions() {
-    saveAsAct->setEnabled(!mat.empty());
-    copyAct->setEnabled(!mat.empty());
-    uploadToImgurAct->setEnabled(!mat.empty());
-    rotateAct->setEnabled(!mat.empty());
-    colorAct->setEnabled(!mat.empty());
-    tintAct->setEnabled(!mat.empty());
-    temperatureAct->setEnabled(!mat.empty());
-    sharpenAct->setEnabled(!mat.empty());
-    brightenAct->setEnabled(!mat.empty());
-    lightenAct->setEnabled(!mat.empty());
-    hueAct->setEnabled(!mat.empty());
-    saturationAct->setEnabled(!mat.empty());
-    contrastAct->setEnabled(!mat.empty());
+    saveAsAct->setEnabled(!image.empty());
+    copyAct->setEnabled(!image.empty());
+    uploadToImgurAct->setEnabled(!image.empty());
+    rotateAct->setEnabled(!image.empty());
+    colorAct->setEnabled(!image.empty());
+    tintAct->setEnabled(!image.empty());
+    temperatureAct->setEnabled(!image.empty());
+    sharpenAct->setEnabled(!image.empty());
+    brightenAct->setEnabled(!image.empty());
+    lightenAct->setEnabled(!image.empty());
+    hueAct->setEnabled(!image.empty());
+    saturationAct->setEnabled(!image.empty());
+    contrastAct->setEnabled(!image.empty());
+    undoAct->setEnabled(controller.can_undo());
+    redoAct->setEnabled(controller.can_redo());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -449,47 +402,85 @@ void ImageViewer::wheelEvent(QWheelEvent* event) {
     } else QWidget::wheelEvent(event);
 }
 
+void ImageViewer::undo() {
+    setImage(controller.undo());
+}
+
+void ImageViewer::redo() {
+    setImage(controller.redo());
+}
+
 void ImageViewer::applySaturation() {
-    int ratio = QInputDialog::getInt(this, tr("Saturation"), tr("Rate:"), 0, -256, 256);
+    int ratio = QInputDialog::getInt(this, tr("Saturation"), tr("Rate:"),
+                                     0, -256, 100);
 
-    cv::Mat res;
-    res = saturate(mat, ratio);
-
-    setImage(res);
+    setImage(controller.saturate(image, ratio));
 }
 
 void ImageViewer::applyBright() {
     int ratio = QInputDialog::getInt(this, tr("Brightness"), tr("Rate:"), 0, -256, 256);
 
-    cv::Mat res;
-    res = brighten(mat, ratio);
-
-    setImage(res);
+    setImage(controller.brighten(image, ratio));
 }
 
 void ImageViewer::applyLight() {
     int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
 
-    cv::Mat res;
-    res = lighten(mat, ratio);
-
-    setImage(res);
+    setImage(controller.lighten(image, ratio));
 }
 
 void ImageViewer::applyHue() {
     int ratio = QInputDialog::getInt(this, tr("Hue"), tr("Rate:"), 0, -256, 256);
 
-    cv::Mat res;
-    res = hue(mat, ratio);
-
-    setImage(res);
+    setImage(controller.hue(image, ratio));
 }
 
 void ImageViewer::applyContrast() {
     int ratio = QInputDialog::getInt(this, tr("Contrast"), tr("Rate:"), 0, -256, 256);
 
-    cv::Mat res;
-    res = contrast(mat, ratio);
+    setImage(controller.contrast(image, ratio));
+}
 
-    setImage(res);
+
+void ImageViewer::rotate() {
+    double angle = QInputDialog::getDouble(this, tr("Rotate"), tr("Angle:"), 0, 0, 360, 0);
+
+    setImage(controller.rotate_in_frame(image, angle));
+}
+
+void ImageViewer::color() {
+    QStringList items;
+    items << tr("Black and White") << tr("Colors");
+    QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
+
+
+    if (item == "Black and White") setImage(controller.gray(image));
+    else if (item == "Colors") {
+        QColor color = QColorDialog::getColor(Qt::magenta, this);
+        double alpha = QInputDialog::getDouble(this, tr("Colors"), tr("Intensity"), 0, 0, 1, 3);
+        int r, g, b;
+        color.getRgb(&r, &g, &b);
+
+        setImage(controller.apply_color(image, r, g, b, alpha));
+    }
+
+}
+
+void ImageViewer::applyTint() {
+    int ratio = QInputDialog::getInt(this, tr("Tint"), tr("Rate:"), 0, -256, 256);
+
+    setImage(controller.tint(image, ratio));
+}
+
+void ImageViewer::applyTemperature() {
+    int degree = QInputDialog::getInt(this, tr("Temperature"), tr("Degree:"), 0, -256, 256);
+
+    setImage(controller.temperature(image, degree));
+}
+
+
+void ImageViewer::applySharp() {
+    double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
+
+    setImage(controller.sharpen(image, degree));
 }

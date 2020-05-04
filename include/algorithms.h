@@ -8,37 +8,68 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
-/*
- *
- * first argument -- src image
- *
- * result -- return value
- *
- */
-
-/*
- *
- * take picture using camera
- *
- * you have to create
- * cv::VideoCapture variable
- *
- * probably like this:
- * cv::VideoCapture cam(0);
- *
- */
-
-cv::Mat takePicture(cv::VideoCapture cam);
+namespace image_algorithms {
+    /*
+     *
+     * first argument -- src image
+     *
+     * result -- return value
+     *
+     */
 
 
-/*
- * crops image
- *
- * result with width = w, height = h
- *
-*/
+    class Command {
+    public:
+        virtual cv::Mat execute(const cv::Mat& image) const = 0;
+    };
 
-cv::Mat crop(const cv::Mat& img, int w, int h, int x = 0, int y = 0);
+    /*
+     *
+     * take picture using camera
+     *
+     * you have to create
+     * cv::VideoCapture variable
+     *
+     * probably like this:
+     * cv::VideoCapture camera(0);
+     *
+     */
+
+    cv::Mat takePicture(cv::VideoCapture camera);
+
+    /*
+     *
+     * does nothing
+     *
+     */
+
+    class Nothing : public Command {
+    public:
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
+
+    /*
+     * crops image
+     *
+     * result with width = w, height = h
+     *
+    */
+
+    class Crop : public Command {
+    private:
+        int w;
+        int h;
+        int x = 0;
+        int y = 0;
+
+    public:
+        // width + x <= cols,
+        // height + y <= rows
+        Crop(int width, int height, int x = 0, int y = 0);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+
+    };
 
 /*
  *
@@ -46,7 +77,17 @@ cv::Mat crop(const cv::Mat& img, int w, int h, int x = 0, int y = 0);
  *
  */
 
-cv::Mat rotate_in_frame(const cv::Mat& img, double angle);
+    class RotateInFrame : public Command {
+    private:
+        double angle;
+
+    public:
+
+        RotateInFrame(double angle);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+
+    };
 
 /*
  *
@@ -54,8 +95,16 @@ cv::Mat rotate_in_frame(const cv::Mat& img, double angle);
  *
  */
 
-cv::Mat saturate(const cv::Mat& img, int value);
+    class Saturate : public Command {
+    private:
+        int value;
 
+    public:
+        // use value <= 60
+        Saturate(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 /*
  *
@@ -63,7 +112,16 @@ cv::Mat saturate(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat brighten(const cv::Mat& img, int value);
+    class Brighten : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Brighten(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -72,7 +130,16 @@ cv::Mat brighten(const cv::Mat& img, int value);
  *
 */
 
-cv::Mat lighten(const cv::Mat& img, int value);
+    class Lighten : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Lighten(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -81,7 +148,16 @@ cv::Mat lighten(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat hue(const cv::Mat& img, int value);
+    class Hue : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Hue(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -90,7 +166,16 @@ cv::Mat hue(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat contrast(const cv::Mat& img, int value);
+    class Contrast : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Contrast(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -99,7 +184,7 @@ cv::Mat contrast(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat lab_add_scalar(const cv::Mat& img, int l, int a = 0, int b = 0);
+    cv::Mat lab_add_scalar(const cv::Mat& image, int l, int a = 0, int b = 0);
 
 /*
  *
@@ -107,7 +192,7 @@ cv::Mat lab_add_scalar(const cv::Mat& img, int l, int a = 0, int b = 0);
  *
  */
 
-cv::Mat hsv_add_scalar(const cv::Mat& img, int l, int a = 0, int b = 0);
+    cv::Mat hsv_add_scalar(const cv::Mat& image, int l, int a = 0, int b = 0);
 
 
 /*
@@ -116,7 +201,11 @@ cv::Mat hsv_add_scalar(const cv::Mat& img, int l, int a = 0, int b = 0);
  *
  */
 
-cv::Mat gray(const cv::Mat& img);
+    class Gray : public Command {
+    public:
+        cv::Mat execute(const cv::Mat& image) const override;
+
+    };
 
 
 /*
@@ -125,7 +214,17 @@ cv::Mat gray(const cv::Mat& img);
  *
  */
 
-cv::Mat blend(const cv::Mat& img1, const cv::Mat& img2, double alpha = 0.5);
+    class Blend : public Command {
+    private:
+        const cv::Mat& image_2;
+        double value;
+
+    public:
+        Blend(const cv::Mat& image_2, double alpha = 0.5);
+
+        cv::Mat execute(const cv::Mat& image_1) const override;
+
+    };
 
 
 /*
@@ -134,7 +233,17 @@ cv::Mat blend(const cv::Mat& img1, const cv::Mat& img2, double alpha = 0.5);
  *
  */
 
-cv::Mat tint(const cv::Mat& img, int value);
+    class Tint : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Tint(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+
+    };
 
 
 /*
@@ -143,7 +252,16 @@ cv::Mat tint(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat temperature(const cv::Mat& img, int value);
+    class Temperature : public Command {
+    private:
+        int value;
+
+    public:
+        // use value <= 60
+        Temperature(int value);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -154,7 +272,16 @@ cv::Mat temperature(const cv::Mat& img, int value);
  *
  */
 
-cv::Mat blur(const cv::Mat& img, double value = 3);
+    class Blur : public Command {
+    private:
+        double value;
+
+    public:
+        // use value <= 10
+        Blur(double value = 3);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 
 /*
@@ -163,8 +290,16 @@ cv::Mat blur(const cv::Mat& img, double value = 3);
  *
  */
 
-cv::Mat sharpen(const cv::Mat& img, double value = 0.5);
+    class Sharpen : public Command {
+    private:
+        double value;
 
+    public:
+        // use value <= 1
+        Sharpen(double value = 0.5);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
 
 /*
  *
@@ -173,6 +308,28 @@ cv::Mat sharpen(const cv::Mat& img, double value = 0.5);
  *
  */
 
-cv::Mat apply_color(const cv::Mat& mat, int r, int g, int b, double alpha);
+    class ApplyColor : public Command {
+    private:
+        int r, g, b;
+        double alpha;
+
+    public:
+        // use value <= 0.4
+        ApplyColor(int r, int g, int b, double alpha = 0.1);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
+
+    class TransformPerspective : public Command {
+    private:
+        cv::Point2f* outputQuad;
+
+    public:
+        // use value <= 0.4
+        TransformPerspective(cv::Point2f* outputQuad);
+
+        cv::Mat execute(const cv::Mat& image) const override;
+    };
+}
 
 #endif //OPENCVTEST_ALGORITHMS_H

@@ -13,6 +13,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
 #include "imgur.h"
+#include "controller.h"
 
 #if defined(QT_PRINTSUPPORT_LIB)
 
@@ -45,15 +46,19 @@ class ImageViewer : public QMainWindow {
 Q_OBJECT
 
 public:
-    ImageViewer(QWidget *parent = nullptr);
+    ImageViewer(QWidget* parent = nullptr);
 
-    bool loadFile(const QString &);
+    bool loadFile(const QString&);
 
 private slots:
 
     void open();
 
-    void saveAs();
+    void undo();
+
+    void redo();
+
+    void save_as();
 
     void upload();
 
@@ -98,44 +103,47 @@ private:
 
     void updateActions();
 
-    bool saveFile(const QString &fileName);
+    bool saveFile(const QString& fileName);
 
-    void setImage(const cv::Mat &newMat);
+    void setImage(const cv::Mat& new_image);
 
     void scaleImage(double factor);
 
-    void adjustScrollBar(QScrollBar *scrollBar, double factor);
+    void adjustScrollBar(QScrollBar* scrollBar, double factor);
 
-    void wheelEvent(QWheelEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
-    cv::Mat mat;
-    QLabel *imageLabel;
-    QScrollArea *scrollArea;
+    cv::Mat image;
+    controller::Controller controller;
+    QLabel* imageLabel;
+    QScrollArea* scrollArea;
     double scaleFactor = 1;
 
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printer)
     QPrinter printer;
 #endif
 
-    QAction *saveAsAct;
-    QAction *uploadToImgurAct;
-    QAction *printAct;
-    QAction *copyAct;
-    QAction *rotateAct;
-    QAction *colorAct;
-    QAction *tintAct;
-    QAction *saturationAct;
-    QAction *brightenAct;
-    QAction *lightenAct;
-    QAction *contrastAct;
-    QAction *hueAct;
-    QAction *temperatureAct;
-    QAction *sharpenAct;
-    QAction *zoomInAct;
-    QAction *zoomOutAct;
-    QAction *normalSizeAct;
-    QAction *fitToWindowAct;
-    CaptureUploader *mCaptureUploader;
+    QAction* undoAct;
+    QAction* redoAct;
+    QAction* saveAsAct;
+    QAction* uploadToImgurAct;
+    QAction* printAct;
+    QAction* copyAct;
+    QAction* rotateAct;
+    QAction* colorAct;
+    QAction* tintAct;
+    QAction* saturationAct;
+    QAction* brightenAct;
+    QAction* lightenAct;
+    QAction* contrastAct;
+    QAction* hueAct;
+    QAction* temperatureAct;
+    QAction* sharpenAct;
+    QAction* zoomInAct;
+    QAction* zoomOutAct;
+    QAction* normalSizeAct;
+    QAction* fitToWindowAct;
+    CaptureUploader* mCaptureUploader;
     //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
 };
 
