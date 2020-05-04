@@ -101,11 +101,8 @@ bool ImageViewer::loadFile(const QString& fileName) {
 
     setWindowFilePath(fileName);
 
-    const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
-            .arg(QDir::toNativeSeparators(fileName)).arg(image.cols).arg(image.rows).arg(image.depth());
-    statusBar()->showMessage(message);
-
     controller.open_image(new_image);
+
     // remember and show image
     setImage(new_image);
 
@@ -160,7 +157,6 @@ void ImageViewer::open() {
     if (path.isEmpty())
         return;
     loadFile(path);
-
 }
 
 void ImageViewer::save_as() {
@@ -248,10 +244,10 @@ void ImageViewer::fitToWindow() {
     QSize label_size = imageLabel->size();
 
     // get factor to scale for
-    double scale_factor = std::min((double) size.width() / label_size.width(),
-                                   (double) (size.height() - 35) / label_size.height());
+    double factor = std::min((double) (size.width() - 3) / label_size.width(),
+                                   (double) (size.height() - 3) / label_size.height());
 
-    scaleImage(scale_factor);
+    scaleImage(factor);
 }
 
 void ImageViewer::about() {
