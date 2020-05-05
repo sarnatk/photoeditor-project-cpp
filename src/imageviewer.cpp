@@ -106,6 +106,10 @@ bool ImageViewer::loadFile(const QString& fileName) {
     // remember and show image
     setImage(new_image);
 
+    scaleFactor = 1.0;
+    imageLabel->adjustSize();
+    fitToWindow();
+
     return true;
 }
 
@@ -113,7 +117,7 @@ void ImageViewer::setImage(const cv::Mat& new_image) {
     image = new_image;
 
     imageLabel->setPixmap(cvMatToQPixmap(image));
-    scaleFactor = 1.0;
+
 
     scrollArea->setVisible(true);
     printAct->setEnabled(true);
@@ -124,8 +128,7 @@ void ImageViewer::setImage(const cv::Mat& new_image) {
 
     updateActions();
 
-    imageLabel->adjustSize();
-    fitToWindow();
+
 }
 
 
@@ -264,7 +267,9 @@ void ImageViewer::createActions() {
     openAct->setShortcut(QKeySequence::Open);
 
     undoAct = fileMenu->addAction(tr("&Undo"), this, &ImageViewer::undo);
+    undoAct->setShortcut(QKeySequence::Undo);
     redoAct = fileMenu->addAction(tr("&Redo"), this, &ImageViewer::redo);
+    redoAct->setShortcut(QKeySequence::Redo);
 
     saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::save_as);
     saveAsAct->setEnabled(false);
