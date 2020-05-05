@@ -55,12 +55,12 @@ namespace controller {
 
     private:
         struct Version : public image_algorithms::Command {
-            explicit Version(const image_algorithms::Command& command, const cv::Mat& image);
+            explicit Version(const image_algorithms::Command& command);
 
             [[nodiscard]] cv::Mat execute(const cv::Mat& image) const override;
 
             const image_algorithms::Command& command;
-            const cv::Mat mat;
+            cv::Mat mat;
         };
 
         int current_version = 0;

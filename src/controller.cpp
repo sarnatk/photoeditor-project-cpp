@@ -7,8 +7,7 @@
 
 namespace controller {
 
-    Controller::Version::Version(const image_algorithms::Command& command, const cv::Mat& img) : command{command},
-                                                                                                 mat{img} {
+    Controller::Version::Version(const image_algorithms::Command& command) : command{command} {
     }
 
     cv::Mat Controller::Version::execute(const cv::Mat& image) const {
@@ -18,32 +17,34 @@ namespace controller {
 
     cv::Mat Controller::undo() {
         assert(current_version > 1);
-        return versions[--current_version].mat;
+        return versions[--current_version - 1].mat;
     }
 
     cv::Mat Controller::redo() {
-        assert(current_version < 9 && versions.size() > current_version + 1);
-        return versions[++current_version].mat;
+        assert(versions.size() > current_version);
+        return versions[current_version++].mat;
     }
 
     cv::Mat Controller::execute(const image_algorithms::Command& command, const cv::Mat& image) {
-        auto this_version = Version(command, image);
+        auto this_version = Version(command);
 
         ++current_version;
         // too much images
-        if (current_version > 9) {
+        if (current_version > 10) {
             versions.pop_front();
-            current_version = 9;
+            current_version = 10;
         }
 
         // insert in center
-        while (current_version + 1 < versions.size()) {
+        while (current_version < versions.size()) {
             versions.pop_back();
         }
 
+        this_version.mat = this_version.execute(image);
+
         versions.push_back(this_version);
 
-        return this_version.execute(image);
+        return this_version.mat;
     }
 
     cv::Mat Controller::saturate(const cv::Mat& img, int value) {
@@ -115,7 +116,7 @@ namespace controller {
     }
 
     bool Controller::can_redo() const {
-        return current_version < 10;
+        return versions.size() > current_version;
     }
 
 
