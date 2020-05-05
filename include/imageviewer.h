@@ -52,6 +52,10 @@ public:
 
 private slots:
 
+    void scalingTime(qreal x);
+
+    void animFinished();
+
     void open();
 
     void undo();
@@ -118,6 +122,8 @@ private:
     QLabel* imageLabel;
     QScrollArea* scrollArea;
     double scaleFactor = 1;
+    double tmpFactor = 1;
+    int _numScheduledScalings = 1;
 
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printer)
     QPrinter printer;
@@ -145,6 +151,7 @@ private:
     QAction* fitToWindowAct;
     CaptureUploader* mCaptureUploader;
     //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
+
 };
 
 #endif

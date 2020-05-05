@@ -245,7 +245,7 @@ void ImageViewer::fitToWindow() {
 
     // get factor to scale for
     double factor = std::min((double) (size.width() - 3) / label_size.width(),
-                                   (double) (size.height() - 3) / label_size.height());
+                             (double) (size.height() - 3) / label_size.height());
 
     scaleImage(factor);
 }
@@ -387,15 +387,31 @@ void ImageViewer::adjustScrollBar(QScrollBar* scrollBar, double factor) {
                             + ((factor - 1) * scrollBar->pageStep() / 2)));
 }
 
+void ImageViewer::animFinished() {
+    if (_numScheduledScalings > 0)
+        _numScheduledScalings--;
+    else
+        sender()->~QObject();
+}
+
+void ImageViewer::scalingTime(double x) {
+    scaleImage(tmpFactor);
+}
+
 void ImageViewer::wheelEvent(QWheelEvent* event) {
     if (event->modifiers().testFlag(Qt::ControlModifier)) {
-        if (event->delta() > 0) {
-            scaleImage(1.05);
-        } else if (event->delta() < 0) {
-            scaleImage(0.952381);
-        }
-        event->accept();
-    } else QWidget::wheelEvent(event);
+        _numScheduledScalings = 300;
+        if (event->delta() > 0)
+            tmpFactor = pow(2.5, 1 / 300.0);
+        else tmpFactor = pow(2.5, -1 / 300.0);
+
+        auto* anim = new QTimeLine(350, this);
+        anim->setUpdateInterval(20);
+
+        connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
+        connect(anim, SIGNAL(finished()), SLOT(animFinished()));
+        anim->start();
+    }
 }
 
 void ImageViewer::undo() {
