@@ -117,7 +117,7 @@ void ImageViewer::setImage(const cv::Mat& new_image) {
     image = new_image;
 
     imageLabel->setPixmap(cvMatToQPixmap(image));
-
+    scaleImage(1);
 
     scrollArea->setVisible(true);
     printAct->setEnabled(true);
