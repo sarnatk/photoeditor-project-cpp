@@ -103,6 +103,8 @@ private slots:
     void about();
 
 private:
+    QToolBar* createToolBar();
+
     void createActions();
 
     void updateActions();
