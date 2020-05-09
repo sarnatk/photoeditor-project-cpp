@@ -73,9 +73,10 @@ namespace image_algorithms {
 
     // value in [-100, 100]
     cv::Mat saturate(const cv::Mat& image, int value) {
-        value >= 0 ? value += 50 : value -= 50;
+        value += 100;
+        double alpha = value / 100.0;
         cv::Mat tmp, res;
-        addWeighted(image, value / 50.0, gray(image), 1 - value / 50.0, 0.0, res);
+        addWeighted(image, alpha, gray(image), 1 - alpha, 0.0, res);
         return res;
     }
 
