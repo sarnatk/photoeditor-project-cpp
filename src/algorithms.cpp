@@ -26,6 +26,15 @@ namespace image_algorithms {
         return image(cv::Rect(x, y, w, h));
     }
 
+    cv::Mat gray(const cv::Mat& image) {
+        cv::Mat bw;
+
+        // black & white filter
+        cvtColor(image, bw, cv::COLOR_BGR2GRAY);
+        cvtColor(bw, bw, cv::COLOR_GRAY2BGR);
+
+        return bw;
+    }
 
     cv::Mat rotate_in_frame(const cv::Mat& image, double angle) {
 
@@ -62,10 +71,12 @@ namespace image_algorithms {
         return res;
     }
 
+    // value in [-100, 100]
     cv::Mat saturate(const cv::Mat& image, int value) {
-
-        // add value to saturation in hsv color space
-        return hsv_add_scalar(image, 0, value);
+        value >= 0 ? value += 50 : value -= 50;
+        cv::Mat tmp, res;
+        addWeighted(image, value / 50.0, gray(image), 1 - value / 50.0, 0.0, res);
+        return res;
     }
 
     cv::Mat brighten(const cv::Mat& image, int value) {
@@ -120,17 +131,6 @@ namespace image_algorithms {
         cvtColor(res, res, cv::COLOR_Lab2BGR);
 
         return res;
-    }
-
-
-    cv::Mat gray(const cv::Mat& image) {
-        cv::Mat bw;
-
-        // black & white filter
-        cvtColor(image, bw, cv::COLOR_BGR2GRAY);
-        cvtColor(bw, image, cv::COLOR_GRAY2BGR);
-
-        return image;
     }
 
 

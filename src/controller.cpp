@@ -36,7 +36,7 @@ namespace controller {
         }
 
         // insert in center
-        while (current_version < versions.size()) {
+        while (current_version <= versions.size()) {
             versions.pop_back();
         }
 
