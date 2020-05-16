@@ -21,6 +21,8 @@ find_package(OpenCV REQUIRED)
 # dependencies QtCore and QtGui
 include_directories(../ ${Qt5Widgets_INCLUDES} ${Qt5Gui_INCLUDES} ${Qt5Core_INCLUDES} ${Qt5Network_INCLUDES} ${Qt5Xml_INCLUDES} ${Qt5PrintSupport_INCLUDES} ${OpenCV_INCLUDE_DIRS} include)
 
+file(COPY icons DESTINATION .)
+
 # We need add -DQT_WIDGETS_LIB when using QtWidgets in Qt 5.
 add_definitions(${Qt5Widgets_DEFINITIONS} ${Qt5Gui_DEFINITIONS} ${Qt5Core_DEFINITIONS} ${Qt5PrintSupport_DEFINITIONS} ${Qt5Network_DEFINITIONS} ${Qt5Xml_DEFINITIONS})
 
