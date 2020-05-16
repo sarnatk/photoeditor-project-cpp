@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QPainter>
+#include <QPushButton>
 #include <QScreen>
 #include <QScrollArea>
 #include <QScrollBar>
@@ -86,6 +87,21 @@ ImageViewer::ImageViewer(QWidget* parent)
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 }
 
+Slider::Slider(QWidget *parent)
+        : QWidget(parent), slider(new QSlider), button(new QPushButton("Print")), edit(new QLineEdit), layout(new QVBoxLayout) {
+    layout->addWidget(button);
+    layout->addWidget(edit);
+    layout->addWidget(slider);
+    setLayout(layout);
+    connect(button, SIGNAL(clicked()), this, SLOT(printValue()));
+    connect(slider, &QSlider::valueChanged, this, &Slider::printValue);
+}
+
+void Slider::printValue() {
+    int value = slider->value();
+    edit->setText("works? " + QString::number(value));
+}
+
 
 bool ImageViewer::loadFile(const QString& fileName) {
     QImageReader reader(fileName);
@@ -127,7 +143,6 @@ void ImageViewer::setImage(const cv::Mat& new_image) {
     normalSizeAct->setEnabled(true);
 
     updateActions();
-
 }
 
 
@@ -263,12 +278,22 @@ QToolBar* ImageViewer::createToolBar() {
     auto* tools = new QToolBar("Linker ToolBar");
     tools->setIconSize(QSize(40, 40));
 
-    tools->addAction(QPixmap("../icons/undo.png"), tr("Undo"), this, &ImageViewer::undo);
-    tools->addAction(QPixmap("../icons/redo.png"), tr("Redo"), this, &ImageViewer::redo);
+    toolUndoAct = tools->addAction(QPixmap("icons/undo.png"), tr("Undo"), this, &ImageViewer::undo);
+    toolUndoAct->setEnabled(false);
+
+    toolRedoAct = tools->addAction(QPixmap("icons/redo.png"), tr("Redo"), this, &ImageViewer::redo);
+    toolRedoAct->setEnabled(false);
+
     tools->addSeparator();
-    tools->addAction(QPixmap("../icons/rotate.png"), tr("Rotate"), this, &ImageViewer::rotate);
-    tools->addAction(QPixmap("../icons/palette.png"), tr("Color"), this, &ImageViewer::color);
-    tools->addAction(QPixmap("../icons/light.png"), tr("Light"), this, &ImageViewer::applyLight);
+
+    toolRotateAct = tools->addAction(QPixmap("icons/rotate.png"), tr("Rotate"), this, &ImageViewer::rotate);
+    toolRotateAct->setEnabled(false);
+
+    toolColorAct = tools->addAction(QPixmap("icons/palette.png"), tr("Color"), this, &ImageViewer::color);
+    toolColorAct->setEnabled(false);
+
+    toolLightenAct = tools->addAction(QPixmap("icons/light.png"), tr("Light"), this, &ImageViewer::applyLight);
+    toolLightenAct->setEnabled(false);
 
     return tools;
 }
@@ -283,8 +308,11 @@ void ImageViewer::createActions() {
 
     undoAct = fileMenu->addAction(tr("&Undo"), this, &ImageViewer::undo);
     undoAct->setShortcut(QKeySequence::Undo);
+    undoAct->setEnabled(false);
+
     redoAct = fileMenu->addAction(tr("&Redo"), this, &ImageViewer::redo);
     redoAct->setShortcut(QKeySequence::Redo);
+    redoAct->setEnabled(false);
 
     saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::save_as);
     saveAsAct->setEnabled(false);
@@ -388,6 +416,11 @@ void ImageViewer::updateActions() {
     contrastAct->setEnabled(!image.empty());
     undoAct->setEnabled(controller.can_undo());
     redoAct->setEnabled(controller.can_redo());
+    toolUndoAct->setEnabled(controller.can_undo());
+    toolRedoAct->setEnabled(controller.can_redo());
+    toolRotateAct->setEnabled(!image.empty());
+    toolColorAct->setEnabled(!image.empty());
+    toolLightenAct->setEnabled(!image.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -435,55 +468,46 @@ void ImageViewer::wheelEvent(QWheelEvent* event) {
 }
 
 void ImageViewer::undo() {
-    if (!controller.can_undo()) return;
     setImage(controller.undo());
 }
 
 void ImageViewer::redo() {
-    if (!controller.can_redo()) return;
     setImage(controller.redo());
 }
 
 void ImageViewer::applySaturation() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Saturation"), tr("Rate:"),
                                      0, -256, 100);
     setImage(controller.saturate(image, ratio));
 }
 
 void ImageViewer::applyBright() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Brightness"), tr("Rate:"), 0, -256, 256);
     setImage(controller.brighten(image, ratio));
 }
 
 void ImageViewer::applyLight() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
     setImage(controller.lighten(image, ratio));
 }
 
 void ImageViewer::applyHue() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Hue"), tr("Rate:"), 0, -256, 256);
     setImage(controller.hue(image, ratio));
 }
 
 void ImageViewer::applyContrast() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Contrast"), tr("Rate:"), 0, -256, 256);
     setImage(controller.contrast(image, ratio));
 }
 
 
 void ImageViewer::rotate() {
-    if (image.empty()) return;
     double angle = QInputDialog::getDouble(this, tr("Rotate"), tr("Angle:"), 0, 0, 360, 0);
     setImage(controller.rotate_in_frame(image, angle));
 }
 
 void ImageViewer::color() {
-    if (image.empty()) return;
     QStringList items;
     items << tr("Black and White") << tr("Colors");
     QString item = QInputDialog::getItem(this, tr("Filter"), tr("Color:"), items, 0, false);
@@ -502,20 +526,17 @@ void ImageViewer::color() {
 }
 
 void ImageViewer::applyTint() {
-    if (image.empty()) return;
     int ratio = QInputDialog::getInt(this, tr("Tint"), tr("Rate:"), 0, -256, 256);
     setImage(controller.tint(image, ratio));
 }
 
 void ImageViewer::applyTemperature() {
-    if (image.empty()) return;
     int degree = QInputDialog::getInt(this, tr("Temperature"), tr("Degree:"), 0, -256, 256);
     setImage(controller.temperature(image, degree));
 }
 
 
 void ImageViewer::applySharp() {
-    if (image.empty()) return;
     double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
     setImage(controller.sharpen(image, degree));
 }

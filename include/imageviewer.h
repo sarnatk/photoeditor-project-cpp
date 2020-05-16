@@ -2,10 +2,12 @@
 #define IMAGEVIEWER_H
 
 #include <QMainWindow>
-#include <QImage>
 #include <QDebug>
 #include <QImage>
+#include <QLineEdit>
 #include <QPixmap>
+#include <QSlider>
+#include <QVBoxLayout>
 #include <QtGlobal>
 
 //#include <kImageAnnotator/KImageAnnotator.h>
@@ -131,6 +133,12 @@ private:
     QPrinter printer;
 #endif
 
+    QAction* toolUndoAct;
+    QAction* toolRedoAct;
+    QAction* toolRotateAct;
+    QAction* toolColorAct;
+    QAction* toolLightenAct;
+
     QAction* undoAct;
     QAction* redoAct;
     QAction* saveAsAct;
@@ -154,6 +162,22 @@ private:
     CaptureUploader* mCaptureUploader;
     //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
 
+};
+
+class Slider : public QWidget {
+Q_OBJECT
+
+public:
+    Slider(QWidget *parent = nullptr);
+
+private slots:
+    void printValue();
+
+private:
+    QSlider* slider;
+    QPushButton* button;
+    QLineEdit* edit;
+    QVBoxLayout* layout;
 };
 
 #endif
