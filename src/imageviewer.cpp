@@ -2,6 +2,7 @@
 #include "algorithms.h"
 
 #include <QApplication>
+#include <QClipboard>
 #include <QDir>
 #include <QFileDialog>
 #include <QImageReader>
@@ -11,7 +12,6 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QPainter>
-#include <QPushButton>
 #include <QScreen>
 #include <QScrollArea>
 #include <QScrollBar>
@@ -32,6 +32,7 @@
 #    include <QtWidgets/QInputDialog>
 #include <QtWidgets/QColorDialog>
 #include <QtWidgets/QSlider>
+#include <QtCore/QTimeLine>
 
 #  endif
 #endif
@@ -86,22 +87,6 @@ ImageViewer::ImageViewer(QWidget* parent)
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 }
-
-Slider::Slider(QWidget *parent)
-        : QWidget(parent), slider(new QSlider), button(new QPushButton("Print")), edit(new QLineEdit), layout(new QVBoxLayout) {
-    layout->addWidget(button);
-    layout->addWidget(edit);
-    layout->addWidget(slider);
-    setLayout(layout);
-    connect(button, SIGNAL(clicked()), this, SLOT(printValue()));
-    connect(slider, &QSlider::valueChanged, this, &Slider::printValue);
-}
-
-void Slider::printValue() {
-    int value = slider->value();
-    edit->setText("works? " + QString::number(value));
-}
-
 
 bool ImageViewer::loadFile(const QString& fileName) {
     QImageReader reader(fileName);
@@ -176,18 +161,12 @@ void ImageViewer::open() {
     loadFile(path);
 }
 
-void ImageViewer::save_as() {
+void ImageViewer::saveAs() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File As"),
                                                     QString(),
                                                     tr("Images (*.png *jpg *jpeg *bmp)"));
 
     while (!saveFile(fileName)) {}
-}
-
-void ImageViewer::upload() {
-    QImage q_image = cvMatToQImage(image); //mKImageAnnotator->image(); ??????????WHYYYYYY WHY WHYYYY D:
-    UploadOperation operation(q_image, mCaptureUploader);
-    operation.execute();
 }
 
 void ImageViewer::print() {
@@ -314,7 +293,7 @@ void ImageViewer::createActions() {
     redoAct->setShortcut(QKeySequence::Redo);
     redoAct->setEnabled(false);
 
-    saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::save_as);
+    saveAsAct = fileMenu->addAction(tr("&Save As..."), this, &ImageViewer::saveAs);
     saveAsAct->setEnabled(false);
 
     printAct = fileMenu->addAction(tr("&Print..."), this, &ImageViewer::print);
@@ -323,7 +302,7 @@ void ImageViewer::createActions() {
 
     fileMenu->addSeparator();
 
-    uploadToImgurAct = fileMenu->addAction(tr("Upload to &Imgur..."), this, &ImageViewer::upload);
+    uploadToImgurAct = fileMenu->addAction(tr("Upload to &Imgur..."), this, &ImageViewer::uploadToImgur);
     uploadToImgurAct->setShortcut(tr("Ctrl+I"));
     uploadToImgurAct->setEnabled(false);
 
@@ -539,4 +518,9 @@ void ImageViewer::applyTemperature() {
 void ImageViewer::applySharp() {
     double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
     setImage(controller.sharpen(image, degree));
+}
+
+void ImageViewer::uploadToImgur() {
+    QPixmap pixmap = cvMatToQPixmap(image);
+    ImgurUploader imgurUploader(pixmap);
 }

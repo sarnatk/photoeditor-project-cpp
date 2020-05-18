@@ -5,12 +5,8 @@
 #include <QDebug>
 #include <QImage>
 #include <QLineEdit>
-#include <QPixmap>
 #include <QSlider>
-#include <QVBoxLayout>
 #include <QtGlobal>
-
-//#include <kImageAnnotator/KImageAnnotator.h>
 
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgproc/types_c.h"
@@ -64,9 +60,9 @@ private slots:
 
     void redo();
 
-    void save_as();
+    void saveAs();
 
-    void upload();
+    void uploadToImgur();
 
     void print();
 
@@ -159,25 +155,7 @@ private:
     QAction* zoomOutAct;
     QAction* normalSizeAct;
     QAction* fitToWindowAct;
-    CaptureUploader* mCaptureUploader;
-    //kImageAnnotator::KImageAnnotator *mKImageAnnotator;
 
-};
-
-class Slider : public QWidget {
-Q_OBJECT
-
-public:
-    Slider(QWidget *parent = nullptr);
-
-private slots:
-    void printValue();
-
-private:
-    QSlider* slider;
-    QPushButton* button;
-    QLineEdit* edit;
-    QVBoxLayout* layout;
 };
 
 #endif
