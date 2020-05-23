@@ -73,3 +73,31 @@ void ImageLabel::setScaledPixmap() {
     scaledPixmap.setDevicePixelRatio(scale);
     setPixmap(scaledPixmap);
 }
+
+bool MessageBoxHelper::yesNo(const QString &title, const QString &question) {
+    auto reply = QMessageBox::question(nullptr, title, question, QMessageBox::Yes | QMessageBox::No);
+    return reply == QMessageBox::Yes;
+}
+
+MessageBoxResponse MessageBoxHelper::yesNoCancel(const QString &title, const QString &question) {
+    auto reply = QMessageBox::question(nullptr, title, question,
+                                       QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    return mapReplyToMessageBoxResponse(reply);
+}
+
+void MessageBoxHelper::ok(const QString &title, const QString &info) {
+    QMessageBox::question(nullptr, title, info, QMessageBox::Ok);
+}
+
+MessageBoxResponse MessageBoxHelper::mapReplyToMessageBoxResponse(int reply) {
+    switch (reply) {
+        case QMessageBox::Yes:
+            return MessageBoxResponse::Yes;
+        case QMessageBox::No:
+            return MessageBoxResponse::No;
+        case QMessageBox::Cancel:
+            return MessageBoxResponse::Cancel;
+        default:
+            return MessageBoxResponse::No;
+    }
+}

@@ -54,6 +54,9 @@ void ImgurUploader::startDrag() {
 }
 
 void ImgurUploader::upload() {
+    bool a = MessageBoxHelper::yesNo(tr("Imgur uploader"),
+                                   tr("You are about to upload the image to Imgur.com, do you want to proceed?"));
+    if (!a) return;
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
     pixmap.save(&buffer, "PNG");

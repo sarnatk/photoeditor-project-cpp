@@ -7,6 +7,7 @@
 #include <QGuiApplication>
 #include <QIcon>
 #include <QLabel>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QObject>
 #include <QPainter>
@@ -17,6 +18,10 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
+
+enum class MessageBoxResponse {
+    Yes, No, Cancel
+};
 
 class NotificationWidget : public QWidget {
 Q_OBJECT
@@ -57,6 +62,17 @@ private:
 
     QGraphicsDropShadowEffect *DSEffect;
     QPixmap pixmap;
+};
+
+class MessageBoxHelper
+{
+public:
+    static bool yesNo(const QString &title, const QString &question);
+    static MessageBoxResponse yesNoCancel(const QString &title, const QString &question);
+    static void ok(const QString &title, const QString &info);
+
+private:
+    static MessageBoxResponse mapReplyToMessageBoxResponse(int reply);
 };
 
 #endif //PHOTOEDITOR_UTILS_H
