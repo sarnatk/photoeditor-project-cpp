@@ -9,12 +9,10 @@
 #include "opencv2/highgui/highgui.hpp"
 
 namespace image_algorithms {
-    /*
+    /**
+     * First argument -- src image
      *
-     * first argument -- src image
-     *
-     * result -- return value
-     *
+     * Result -- return value
      */
 
 
@@ -23,38 +21,31 @@ namespace image_algorithms {
         virtual cv::Mat execute(const cv::Mat& image) const = 0;
     };
 
-    /*
+    /**
      *
-     * take picture using camera
+     * Take picture using camera
      *
-     * you have to create
+     * You have to create
      * cv::VideoCapture variable
      *
-     * probably like this:
+     * Probably like this:
      * cv::VideoCapture camera(0);
-     *
      */
-
     cv::Mat takePicture(cv::VideoCapture camera);
 
-    /*
-     *
-     * does nothing
-     *
+    /**
+     * Does nothing -- use to open image
      */
-
     class Nothing : public Command {
     public:
         cv::Mat execute(const cv::Mat& image) const override;
     };
 
-    /*
-     * crops image
-     *
-     * result with width = w, height = h
-     *
-    */
 
+    /**
+     * Crops image
+     * Result with width = w, height = h
+     */
     class Crop : public Command {
     private:
         int w;
@@ -71,12 +62,9 @@ namespace image_algorithms {
 
     };
 
-/*
- *
- * rotates image by given angle without crop
- *
- */
-
+    /**
+     * Rotates image by given angle without crop
+     */
     class RotateInFrame : public Command {
     private:
         double angle;
@@ -89,12 +77,9 @@ namespace image_algorithms {
 
     };
 
-/*
- *
- * saturates image
- *
- */
-
+    /**
+     * Saturates image
+     */
     class Saturate : public Command {
     private:
         int value;
@@ -106,12 +91,9 @@ namespace image_algorithms {
         cv::Mat execute(const cv::Mat& image) const override;
     };
 
-/*
- *
- * brightens image
- *
- */
-
+    /**
+     * Brightens image
+     */
     class Brighten : public Command {
     private:
         int value;
@@ -124,12 +106,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * lightens image (it actually is different from brighten)
- *
-*/
-
+    /**
+     * Lightens image (it actually is different from brighten)
+     */
     class Lighten : public Command {
     private:
         int value;
@@ -142,12 +121,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * brightens image
- *
- */
-
+    /**
+     * Hue
+     */
     class Hue : public Command {
     private:
         int value;
@@ -160,12 +136,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * brightens image
- *
- */
-
+    /**
+     * Change contrast
+     */
     class Contrast : public Command {
     private:
         int value;
@@ -178,29 +151,20 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- *  add scalar in L*a*b color space
- *
- */
-
+    /**
+     *  Add scalar in L*a*b color space
+     */
     cv::Mat lab_add_scalar(const cv::Mat& image, int l, int a = 0, int b = 0);
 
-/*
- *
- *  add scalar in hsv color space
- *
- */
-
+    /**
+     *  Add scalar in hsv color space
+     */
     cv::Mat hsv_add_scalar(const cv::Mat& image, int l, int a = 0, int b = 0);
 
 
-/*
- *
- * black and white filter
- *
- */
-
+    /**
+     * Black and white filter
+     */
     class Gray : public Command {
     public:
         cv::Mat execute(const cv::Mat& image) const override;
@@ -208,12 +172,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * blends two images with given ratio
- *
- */
-
+    /**
+     * Blends two images with given ratio
+     */
     class Blend : public Command {
     private:
         const cv::Mat& image_2;
@@ -227,12 +188,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * tint
- *
- */
-
+    /**
+     * Tint
+     */
     class Tint : public Command {
     private:
         int value;
@@ -246,12 +204,9 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- *  changes color temperature
- *
- */
-
+    /**
+     *  Changes color temperature
+     */
     class Temperature : public Command {
     private:
         int value;
@@ -264,57 +219,49 @@ namespace image_algorithms {
     };
 
 
-/*
- *
- * blurs image
- *
- * double value in (0, 5]
- *
- */
-
+    /**
+     * Blurs image
+     *
+     * Use double value in (0, 5]
+     */
     class Blur : public Command {
     private:
         double value;
 
     public:
-        // use value <= 10
         Blur(double value = 3);
 
         cv::Mat execute(const cv::Mat& image) const override;
     };
 
 
-/*
- *
- * sharpens image
- *
- */
-
+    /**
+     * Sharpens image
+     *
+     * Use |value| <= 1
+     */
     class Sharpen : public Command {
     private:
         double value;
 
     public:
-        // use value <= 1
         Sharpen(double value = 0.5);
 
         cv::Mat execute(const cv::Mat& image) const override;
     };
 
-/*
- *
- * blend image with given
- * rgb color
- *
- */
-
+    /**
+     * Blend image with given
+     * RGB color
+     *
+     * Use value <= 0.4
+     */
     class ApplyColor : public Command {
     private:
         int r, g, b;
         double alpha;
 
     public:
-        // use value <= 0.4
         ApplyColor(int r, int g, int b, double alpha = 0.1);
 
         cv::Mat execute(const cv::Mat& image) const override;
