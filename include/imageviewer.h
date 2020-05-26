@@ -12,6 +12,7 @@
 #include "opencv2/imgproc/types_c.h"
 #include "imgur.h"
 #include "controller.h"
+#include "sliders.h"
 
 #if defined(QT_PRINTSUPPORT_LIB)
 
@@ -155,6 +156,10 @@ private:
     QAction* zoomOutAct;
     QAction* normalSizeAct;
     QAction* fitToWindowAct;
+
+private:
+    QLineEdit* edit = nullptr;
+    SliderWindow* window = nullptr;
 
 };
 

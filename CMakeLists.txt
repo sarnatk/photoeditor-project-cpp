@@ -30,7 +30,7 @@ add_definitions(${Qt5Widgets_DEFINITIONS} ${Qt5Gui_DEFINITIONS} ${Qt5Core_DEFINI
 # without -fPIE. We add that here.
 set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Gui_EXECUTABLE_COMPILE_FLAGS} ${Qt5PrintSupport_EXECUTABLE_COMPILE_FLAGS} ${Qt5Network_EXECUTABLE_COMPILE_FLAGSS} ${Qt5Xml_EXECUTABLE_COMPILE_FLAGS}")
 
-add_executable(photoeditor include/imageviewer.h include/algorithms.h include/imgur.h src/imageviewer.cpp src/algorithms.cpp src/imgur.cpp src/main.cpp src/controller.cpp include/controller.h include/utils.h src/utils.cpp)
+add_executable(photoeditor include/imageviewer.h include/algorithms.h include/imgur.h src/imageviewer.cpp src/algorithms.cpp src/imgur.cpp src/main.cpp src/controller.cpp include/controller.h include/utils.h src/utils.cpp include/sliders.h src/sliders.cpp)
 
 
 target_link_libraries(photoeditor ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5PrintSupport_LIBRARIES} ${Qt5Network_LIBRARIES} ${Qt5Xml_LIBRARIES} ${OpenCV_LIBS})

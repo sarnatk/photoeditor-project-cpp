@@ -37,7 +37,7 @@
 #  endif
 #endif
 
-ImageViewer::ImageViewer(QWidget* parent)
+ImageViewer::ImageViewer(QWidget *parent)
         : QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea) {
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -88,7 +88,7 @@ ImageViewer::ImageViewer(QWidget* parent)
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 }
 
-bool ImageViewer::loadFile(const QString& fileName) {
+bool ImageViewer::loadFile(const QString &fileName) {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
 
@@ -114,7 +114,7 @@ bool ImageViewer::loadFile(const QString& fileName) {
     return true;
 }
 
-void ImageViewer::setImage(const cv::Mat& new_image) {
+void ImageViewer::setImage(const cv::Mat &new_image) {
     image = new_image;
 
     imageLabel->setPixmap(cvMatToQPixmap(image));
@@ -131,7 +131,7 @@ void ImageViewer::setImage(const cv::Mat& new_image) {
 }
 
 
-bool ImageViewer::saveFile(const QString& fileName) {
+bool ImageViewer::saveFile(const QString &fileName) {
     QImageWriter writer(fileName);
 
     if (!imwrite(fileName.toStdString(), image)) {
@@ -149,7 +149,7 @@ bool ImageViewer::saveFile(const QString& fileName) {
 void ImageViewer::open() {
     QList<QByteArray> formats = QImageReader::supportedImageFormats();
     QStringList list;
-    for (auto& fmt : formats)
+    for (auto &fmt : formats)
         list.append("*." + QString(fmt));
     auto filter = "Images (" + list.join(" ") + ")";
 
@@ -194,7 +194,7 @@ void ImageViewer::copy() {
 #ifndef QT_NO_CLIPBOARD
 
 static QImage clipboardImage() {
-    if (const QMimeData* mimeData = QGuiApplication::clipboard()->mimeData()) {
+    if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData()) {
         if (mimeData->hasImage()) {
             const auto image = qvariant_cast<QImage>(mimeData->imageData());
             if (!image.isNull())
@@ -253,8 +253,8 @@ void ImageViewer::about() {
                           "</p><p>Enjoy!</p>"));
 }
 
-QToolBar* ImageViewer::createToolBar() {
-    auto* tools = new QToolBar("Linker ToolBar");
+QToolBar *ImageViewer::createToolBar() {
+    auto *tools = new QToolBar("Linker ToolBar");
     tools->setIconSize(QSize(40, 40));
 
     toolUndoAct = tools->addAction(QPixmap("icons/undo.png"), tr("Undo"), this, &ImageViewer::undo);
@@ -280,9 +280,9 @@ QToolBar* ImageViewer::createToolBar() {
 void ImageViewer::createActions() {
     addToolBar(Qt::LeftToolBarArea, createToolBar());
 
-    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
 
-    QAction* openAct = fileMenu->addAction(tr("&Open..."), this, &ImageViewer::open);
+    QAction *openAct = fileMenu->addAction(tr("&Open..."), this, &ImageViewer::open);
     openAct->setShortcut(QKeySequence::Open);
 
     undoAct = fileMenu->addAction(tr("&Undo"), this, &ImageViewer::undo);
@@ -308,16 +308,16 @@ void ImageViewer::createActions() {
 
     fileMenu->addSeparator();
 
-    QAction* exitAct = fileMenu->addAction(tr("E&xit"), this, &QWidget::close);
+    QAction *exitAct = fileMenu->addAction(tr("E&xit"), this, &QWidget::close);
     exitAct->setShortcut(tr("Ctrl+Q"));
 
-    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
+    QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
 
     copyAct = editMenu->addAction(tr("&Copy"), this, &ImageViewer::copy);
     copyAct->setShortcut(QKeySequence::Copy);
     copyAct->setEnabled(false);
 
-    QAction* pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
+    QAction *pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
     pasteAct->setShortcut(QKeySequence::Paste);
 
     rotateAct = editMenu->addAction(tr("&Rotate"), this, &ImageViewer::rotate);
@@ -353,7 +353,7 @@ void ImageViewer::createActions() {
     sharpenAct = editMenu->addAction(tr("Sharpen"), this, &ImageViewer::applySharp);
     sharpenAct->setEnabled(false);
 
-    QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
+    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
     zoomInAct = viewMenu->addAction(tr("Zoom &In (25%)"), this, &ImageViewer::zoomIn);
     zoomInAct->setShortcut(tr("Ctrl+="));
@@ -373,7 +373,7 @@ void ImageViewer::createActions() {
     fitToWindowAct->setEnabled(false);
     fitToWindowAct->setShortcut(tr("Ctrl+F"));
 
-    QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
+    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
 
     helpMenu->addAction(tr("&About"), this, &ImageViewer::about);
     helpMenu->addAction(tr("About &Qt"), &QApplication::aboutQt);
@@ -414,30 +414,26 @@ void ImageViewer::scaleImage(double factor) {
     zoomOutAct->setEnabled(scaleFactor > 0.333);
 }
 
-void ImageViewer::adjustScrollBar(QScrollBar* scrollBar, double factor) {
-    scrollBar->setValue(int(factor * scrollBar->value()
-                            + ((factor - 1) * scrollBar->pageStep() / 2)));
+void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor) {
+    scrollBar->setValue(int(factor * scrollBar->value() + ((factor - 1) * scrollBar->pageStep() / 2)));
 }
 
 void ImageViewer::animFinished() {
-    if (_numScheduledScalings > 0)
-        _numScheduledScalings--;
-    else
-        sender()->~QObject();
+    if (_numScheduledScalings > 0) _numScheduledScalings--;
+    else sender()->~QObject();
 }
 
 void ImageViewer::scalingTime(double x) {
     scaleImage(tmpFactor);
 }
 
-void ImageViewer::wheelEvent(QWheelEvent* event) {
+void ImageViewer::wheelEvent(QWheelEvent *event) {
     if (event->modifiers().testFlag(Qt::ControlModifier)) {
         _numScheduledScalings = 300;
-        if (event->delta() > 0)
-            tmpFactor = pow(2.5, 1 / 300.0);
+        if (event->delta() > 0) tmpFactor = pow(2.5, 1 / 300.0);
         else tmpFactor = pow(2.5, -1 / 300.0);
 
-        auto* anim = new QTimeLine(350, this);
+        auto *anim = new QTimeLine(350, this);
         anim->setUpdateInterval(20);
 
         connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
@@ -466,7 +462,15 @@ void ImageViewer::applyBright() {
 }
 
 void ImageViewer::applyLight() {
-    int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    window = new SliderWindow(nullptr, edit);
+    window->show();
+    connect(toolLightenAct, SIGNAL(triggered()), this, SLOT(setValue()));
+    int ratio = window->value;
+    std::cout << ratio << '\n';
+    //int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
     setImage(controller.lighten(image, ratio));
 }
 
