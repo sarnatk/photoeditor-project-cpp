@@ -71,6 +71,8 @@ private slots:
 
     void paste();
 
+    void crop();
+
     void rotate();
 
     void color();
@@ -149,6 +151,7 @@ private:
 
     QAction* toolUndoAct;
     QAction* toolRedoAct;
+    QAction* toolCropAct;
     QAction* toolRotateAct;
     QAction* toolColorAct;
     QAction* toolLightenAct;
@@ -164,20 +167,18 @@ private:
     QAction* uploadToImgurAct;
     QAction* printAct;
     QAction* copyAct;
+    QAction* cropAct;
     QAction* rotateAct;
     QAction* tintAct;
     QAction* saturationAct;
     QAction* brightenAct;
-    QAction* lightenAct;
     QAction* contrastAct;
-    QAction* temperatureAct;
     QAction* zoomInAct;
     QAction* zoomOutAct;
     QAction* normalSizeAct;
     QAction* fitToWindowAct;
 
 private:
-    QLineEdit* edit = nullptr;
     QDialog* window = nullptr;
 
 };

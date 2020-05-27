@@ -59,7 +59,7 @@ ImageViewer::ImageViewer(QWidget *parent)
     darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
     darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
     darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::darkGray);
     darkPalette.setColor(QPalette::ToolTipText, Qt::white);
     darkPalette.setColor(QPalette::Text, Qt::white);
     darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
@@ -267,9 +267,15 @@ QToolBar *ImageViewer::createToolBar() {
     tools->addSeparator();
     tools->addSeparator();
 
+    toolCropAct = tools->addAction(QPixmap("icons/crop.png"), tr("Crop"), this, &ImageViewer::crop);
+    toolCropAct->setEnabled(false);
 
     toolRotateAct = tools->addAction(QPixmap("icons/rotate.png"), tr("Rotate"), this, &ImageViewer::rotate);
     toolRotateAct->setEnabled(false);
+
+    tools->addSeparator();
+    tools->addSeparator();
+    tools->addSeparator();
 
     toolLightenAct = tools->addAction(QPixmap("icons/light.png"), tr("Light"), this, &ImageViewer::applyLight);
     toolLightenAct->setEnabled(false);
@@ -346,6 +352,10 @@ void ImageViewer::createActions() {
     QAction *pasteAct = editMenu->addAction(tr("&Paste"), this, &ImageViewer::paste);
     pasteAct->setShortcut(QKeySequence::Paste);
 
+    cropAct = editMenu->addAction(tr("&Crop"), this, &ImageViewer::crop);
+    cropAct->setShortcut(tr("Ctrl+D"));
+    cropAct->setEnabled(false);
+
     rotateAct = editMenu->addAction(tr("&Rotate"), this, &ImageViewer::rotate);
     rotateAct->setShortcut(tr("Ctrl+R"));
     rotateAct->setEnabled(false);
@@ -392,6 +402,7 @@ void ImageViewer::updateActions() {
     saveAsAct->setEnabled(!image.empty());
     copyAct->setEnabled(!image.empty());
     uploadToImgurAct->setEnabled(!image.empty());
+    cropAct->setEnabled(!image.empty());
     rotateAct->setEnabled(!image.empty());
     tintAct->setEnabled(!image.empty());
     brightenAct->setEnabled(!image.empty());
@@ -401,6 +412,7 @@ void ImageViewer::updateActions() {
     redoAct->setEnabled(controller.can_redo());
     toolUndoAct->setEnabled(controller.can_undo());
     toolRedoAct->setEnabled(controller.can_redo());
+    toolCropAct->setEnabled(!image.empty());
     toolRotateAct->setEnabled(!image.empty());
     toolColorAct->setEnabled(!image.empty());
     toolLightenAct->setEnabled(!image.empty());
@@ -457,6 +469,14 @@ void ImageViewer::undo() {
 
 void ImageViewer::redo() {
     setImage(controller.redo());
+}
+
+void ImageViewer::crop() {
+    int x = QInputDialog::getInt(this, tr("Crop"), tr("x:"), 0, 0, image.cols);
+    int y = QInputDialog::getInt(this, tr("Crop"), tr("y:"), 0, 0, image.rows);
+    int w = QInputDialog::getInt(this, tr("Crop"), tr("width:"), 0, 0, image.cols - x);
+    int h = QInputDialog::getInt(this, tr("Crop"), tr("height:"), 0, 0, image.rows - y);
+    setImage(controller.crop(image, w, h, x, y));
 }
 
 void ImageViewer::applyBright() {
