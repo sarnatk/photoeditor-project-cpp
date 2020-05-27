@@ -490,7 +490,7 @@ void ImageViewer::cancel() {
 }
 
 void ImageViewer::saturate(int ratio) {
-    auto im = image;
+    auto im = oldImage;
     setImage(controller.saturate(im, ratio));
 }
 
@@ -501,8 +501,8 @@ void ImageViewer::applySaturation() {
     auto *cancelButton= new QPushButton("Cancel");
     auto *layout = new QVBoxLayout;
     window = new QDialog;
-    slider->setMinimum(-3);
-    slider->setMaximum(30);
+    slider->setMinimum(0);
+    slider->setMaximum(50);
     layout->addWidget(slider);
     layout->addWidget(applyButton);
     layout->addWidget(cancelButton);
@@ -515,8 +515,7 @@ void ImageViewer::applySaturation() {
 }
 
 void ImageViewer::lighten(int ratio) {
-    auto im = image;
-    ratio = ratio > 0 ? 3 : -5;
+    auto im = oldImage;
     setImage(controller.lighten(im, ratio));
 }
 
@@ -527,8 +526,8 @@ void ImageViewer::applyLight() {
     auto *cancelButton= new QPushButton("Cancel");
     auto *layout = new QVBoxLayout;
     window = new QDialog;
-    slider->setMinimum(-20);
-    slider->setMaximum(20);
+    slider->setMinimum(-80);
+    slider->setMaximum(80);
     layout->addWidget(slider);
     layout->addWidget(applyButton);
     layout->addWidget(cancelButton);
@@ -541,7 +540,7 @@ void ImageViewer::applyLight() {
 }
 
 void ImageViewer::hue(int ratio) {
-    auto im = image;
+    auto im = oldImage;
     setImage(controller.hue(im, ratio));
 }
 
@@ -601,8 +600,7 @@ void ImageViewer::applyTint() {
 
 
 void ImageViewer::temperature(int ratio) {
-    auto im = image;
-    ratio = ratio > 0 ? 2 : -2;
+    auto im = oldImage;
     setImage(controller.temperature(im, ratio));
 }
 
@@ -613,8 +611,8 @@ void ImageViewer::applyTemperature() {
     auto *cancelButton= new QPushButton("Cancel");
     auto *layout = new QVBoxLayout;
     window = new QDialog;
-    slider->setMinimum(-25);
-    slider->setMaximum(25);
+    slider->setMinimum(-80);
+    slider->setMaximum(80);
     layout->addWidget(slider);
     layout->addWidget(applyButton);
     layout->addWidget(cancelButton);
@@ -627,7 +625,7 @@ void ImageViewer::applyTemperature() {
 }
 
 void ImageViewer::blur(int ratio) {
-    auto im = image;
+    auto im = oldImage;
     double degree = (double) ratio / -10;
     setImage(controller.sharpen(im, degree));
 }
@@ -653,7 +651,7 @@ void ImageViewer::applyBlur() {
 }
 
 void ImageViewer::sharp(int ratio) {
-    auto im = image;
+    auto im = oldImage;
     double degree = (double) ratio / 10;
     setImage(controller.sharpen(im, degree));
 }
