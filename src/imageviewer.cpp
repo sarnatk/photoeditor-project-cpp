@@ -475,9 +475,6 @@ void ImageViewer::saturate(int ratio) {
 }
 
 void ImageViewer::applySaturation() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *slider = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
@@ -504,9 +501,6 @@ void ImageViewer::lighten(int ratio) {
 }
 
 void ImageViewer::applyLight() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *slider = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
@@ -532,9 +526,6 @@ void ImageViewer::hue(int ratio) {
 }
 
 void ImageViewer::applyHue() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *slider = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
@@ -596,9 +587,6 @@ void ImageViewer::temperature(int ratio) {
 }
 
 void ImageViewer::applyTemperature() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *slider = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
@@ -625,9 +613,6 @@ void ImageViewer::blur(int ratio) {
 }
 
 void ImageViewer::applyBlur() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *sliderBlur = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
@@ -654,9 +639,6 @@ void ImageViewer::sharp(int ratio) {
 }
 
 void ImageViewer::applySharp() {
-    delete edit;
-    delete window;
-    edit = new QLineEdit;
     oldImage = image;
     auto *sliderSharpness = new QSlider(Qt::Horizontal);
     auto *applyButton= new QPushButton("Apply");
