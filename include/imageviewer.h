@@ -75,11 +75,15 @@ private slots:
 
     void color();
 
+    void cancel();
+
     void applyTint();
 
     void applySaturation();
 
     void applyBright();
+
+    void applyBlur();
 
     void applyLight();
 
@@ -90,6 +94,18 @@ private slots:
     void applyTemperature();
 
     void applySharp();
+
+    void blur(int ratio);
+
+    void lighten(int ratio);
+
+    void saturate(int ratio);
+
+    void sharp(int ratio);
+
+    void hue(int ratio);
+
+    void temperature(int ratio);
 
     void zoomIn();
 
@@ -119,6 +135,7 @@ private:
     void wheelEvent(QWheelEvent* event) override;
 
     cv::Mat image;
+    cv::Mat oldImage;
     controller::Controller controller;
     QLabel* imageLabel;
     QScrollArea* scrollArea;
@@ -135,6 +152,11 @@ private:
     QAction* toolRotateAct;
     QAction* toolColorAct;
     QAction* toolLightenAct;
+    QAction* toolTemperatureAct;
+    QAction* toolHueAct;
+    QAction* toolSaturateAct;
+    QAction* toolSharpenAct;
+    QAction* toolBlurAct;
 
     QAction* undoAct;
     QAction* redoAct;
@@ -143,15 +165,12 @@ private:
     QAction* printAct;
     QAction* copyAct;
     QAction* rotateAct;
-    QAction* colorAct;
     QAction* tintAct;
     QAction* saturationAct;
     QAction* brightenAct;
     QAction* lightenAct;
     QAction* contrastAct;
-    QAction* hueAct;
     QAction* temperatureAct;
-    QAction* sharpenAct;
     QAction* zoomInAct;
     QAction* zoomOutAct;
     QAction* normalSizeAct;
@@ -159,7 +178,7 @@ private:
 
 private:
     QLineEdit* edit = nullptr;
-    SliderWindow* window = nullptr;
+    QDialog* window = nullptr;
 
 };
 

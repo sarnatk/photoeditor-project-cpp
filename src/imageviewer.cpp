@@ -264,15 +264,41 @@ QToolBar *ImageViewer::createToolBar() {
     toolRedoAct->setEnabled(false);
 
     tools->addSeparator();
+    tools->addSeparator();
+    tools->addSeparator();
+
 
     toolRotateAct = tools->addAction(QPixmap("icons/rotate.png"), tr("Rotate"), this, &ImageViewer::rotate);
     toolRotateAct->setEnabled(false);
 
+    toolLightenAct = tools->addAction(QPixmap("icons/light.png"), tr("Light"), this, &ImageViewer::applyLight);
+    toolLightenAct->setEnabled(false);
+
+    toolTemperatureAct = tools->addAction(QPixmap("icons/temperature.png"), tr("Temperature"), this, &ImageViewer::applyTemperature);
+    toolTemperatureAct->setEnabled(false);
+
+    tools->addSeparator();
+    tools->addSeparator();
+    tools->addSeparator();
+
     toolColorAct = tools->addAction(QPixmap("icons/palette.png"), tr("Color"), this, &ImageViewer::color);
     toolColorAct->setEnabled(false);
 
-    toolLightenAct = tools->addAction(QPixmap("icons/light.png"), tr("Light"), this, &ImageViewer::applyLight);
-    toolLightenAct->setEnabled(false);
+    toolHueAct = tools->addAction(QPixmap("icons/rainbow.png"), tr("Hue"), this, &ImageViewer::applyHue);
+    toolHueAct->setEnabled(false);
+
+    tools->addSeparator();
+    tools->addSeparator();
+    tools->addSeparator();
+
+    toolSharpenAct = tools->addAction(QPixmap("icons/clear.png"), tr("Sharp"), this, &ImageViewer::applySharp);
+    toolSharpenAct->setEnabled(false);
+
+    toolBlurAct = tools->addAction(QPixmap("icons/blur.png"), tr("Blur"), this, &ImageViewer::applyBlur);
+    toolBlurAct->setEnabled(false);
+
+    toolSaturateAct = tools->addAction(QPixmap("icons/stars.png"), tr("Saturation"), this, &ImageViewer::applySaturation);
+    toolSaturateAct->setEnabled(false);
 
     return tools;
 }
@@ -324,34 +350,17 @@ void ImageViewer::createActions() {
     rotateAct->setShortcut(tr("Ctrl+R"));
     rotateAct->setEnabled(false);
 
-    colorAct = editMenu->addAction(tr("Color"), this, &ImageViewer::color);
-    colorAct->setEnabled(false);
-
-
     tintAct = editMenu->addAction(tr("Tint"), this, &ImageViewer::applyTint);
     tintAct->setEnabled(false);
 
     brightenAct = editMenu->addAction(tr("Brightness"), this, &ImageViewer::applyBright);
     brightenAct->setEnabled(false);
 
-    lightenAct = editMenu->addAction(tr("Lightness"), this, &ImageViewer::applyLight);
-    lightenAct->setEnabled(false);
-
     contrastAct = editMenu->addAction(tr("Contrast"), this, &ImageViewer::applyContrast);
     contrastAct->setEnabled(false);
 
     saturationAct = editMenu->addAction(tr("Saturation"), this, &ImageViewer::applySaturation);
     saturationAct->setEnabled(false);
-
-    hueAct = editMenu->addAction(tr("Hue"), this, &ImageViewer::applyHue);
-    hueAct->setEnabled(false);
-
-
-    temperatureAct = editMenu->addAction(tr("Temperature"), this, &ImageViewer::applyTemperature);
-    temperatureAct->setEnabled(false);
-
-    sharpenAct = editMenu->addAction(tr("Sharpen"), this, &ImageViewer::applySharp);
-    sharpenAct->setEnabled(false);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
@@ -384,13 +393,8 @@ void ImageViewer::updateActions() {
     copyAct->setEnabled(!image.empty());
     uploadToImgurAct->setEnabled(!image.empty());
     rotateAct->setEnabled(!image.empty());
-    colorAct->setEnabled(!image.empty());
     tintAct->setEnabled(!image.empty());
-    temperatureAct->setEnabled(!image.empty());
-    sharpenAct->setEnabled(!image.empty());
     brightenAct->setEnabled(!image.empty());
-    lightenAct->setEnabled(!image.empty());
-    hueAct->setEnabled(!image.empty());
     saturationAct->setEnabled(!image.empty());
     contrastAct->setEnabled(!image.empty());
     undoAct->setEnabled(controller.can_undo());
@@ -400,6 +404,11 @@ void ImageViewer::updateActions() {
     toolRotateAct->setEnabled(!image.empty());
     toolColorAct->setEnabled(!image.empty());
     toolLightenAct->setEnabled(!image.empty());
+    toolTemperatureAct->setEnabled(!image.empty());
+    toolHueAct->setEnabled(!image.empty());
+    toolSharpenAct->setEnabled(!image.empty());
+    toolBlurAct->setEnabled(!image.empty());
+    toolSaturateAct->setEnabled(!image.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -450,33 +459,99 @@ void ImageViewer::redo() {
     setImage(controller.redo());
 }
 
-void ImageViewer::applySaturation() {
-    int ratio = QInputDialog::getInt(this, tr("Saturation"), tr("Rate:"),
-                                     0, -256, 100);
-    setImage(controller.saturate(image, ratio));
-}
-
 void ImageViewer::applyBright() {
     int ratio = QInputDialog::getInt(this, tr("Brightness"), tr("Rate:"), 0, -256, 256);
     setImage(controller.brighten(image, ratio));
+}
+
+void ImageViewer::cancel() {
+    setImage(oldImage);
+    window->close();
+}
+
+void ImageViewer::saturate(int ratio) {
+    auto im = image;
+    setImage(controller.saturate(im, ratio));
+}
+
+void ImageViewer::applySaturation() {
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    oldImage = image;
+    auto *slider = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    slider->setMinimum(-3);
+    slider->setMaximum(30);
+    layout->addWidget(slider);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Saturation"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(slider, &QSlider::valueChanged, this, &ImageViewer::saturate);
+}
+
+void ImageViewer::lighten(int ratio) {
+    auto im = image;
+    ratio = ratio > 0 ? 3 : -5;
+    setImage(controller.lighten(im, ratio));
 }
 
 void ImageViewer::applyLight() {
     delete edit;
     delete window;
     edit = new QLineEdit;
-    window = new SliderWindow(nullptr, edit);
+    oldImage = image;
+    auto *slider = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    slider->setMinimum(-20);
+    slider->setMaximum(20);
+    layout->addWidget(slider);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Light"));
+    window->setLayout(layout);
     window->show();
-    connect(toolLightenAct, SIGNAL(triggered()), this, SLOT(setValue()));
-    int ratio = window->value;
-    std::cout << ratio << '\n';
-    //int ratio = QInputDialog::getInt(this, tr("Lightness"), tr("Rate:"), 0, -256, 256);
-    setImage(controller.lighten(image, ratio));
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(slider, &QSlider::valueChanged, this, &ImageViewer::lighten);
+}
+
+void ImageViewer::hue(int ratio) {
+    auto im = image;
+    setImage(controller.hue(im, ratio));
 }
 
 void ImageViewer::applyHue() {
-    int ratio = QInputDialog::getInt(this, tr("Hue"), tr("Rate:"), 0, -256, 256);
-    setImage(controller.hue(image, ratio));
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    oldImage = image;
+    auto *slider = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    slider->setMinimum(0);
+    slider->setMaximum(50);
+    layout->addWidget(slider);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Hue"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(slider, &QSlider::valueChanged, this, &ImageViewer::hue);
 }
 
 void ImageViewer::applyContrast() {
@@ -513,15 +588,92 @@ void ImageViewer::applyTint() {
     setImage(controller.tint(image, ratio));
 }
 
-void ImageViewer::applyTemperature() {
-    int degree = QInputDialog::getInt(this, tr("Temperature"), tr("Degree:"), 0, -256, 256);
-    setImage(controller.temperature(image, degree));
+
+void ImageViewer::temperature(int ratio) {
+    auto im = image;
+    ratio = ratio > 0 ? 2 : -2;
+    setImage(controller.temperature(im, ratio));
 }
 
+void ImageViewer::applyTemperature() {
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    oldImage = image;
+    auto *slider = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    slider->setMinimum(-25);
+    slider->setMaximum(25);
+    layout->addWidget(slider);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Temperature"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(slider, &QSlider::valueChanged, this, &ImageViewer::temperature);
+}
+
+void ImageViewer::blur(int ratio) {
+    auto im = image;
+    double degree = (double) ratio / -10;
+    setImage(controller.sharpen(im, degree));
+}
+
+void ImageViewer::applyBlur() {
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    oldImage = image;
+    auto *sliderBlur = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    sliderBlur->setMinimum(0);
+    sliderBlur->setMaximum(20);
+    layout->addWidget(sliderBlur);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Blur"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(sliderBlur, &QSlider::valueChanged, this, &ImageViewer::blur);
+}
+
+void ImageViewer::sharp(int ratio) {
+    auto im = image;
+    double degree = (double) ratio / 10;
+    setImage(controller.sharpen(im, degree));
+}
 
 void ImageViewer::applySharp() {
-    double degree = QInputDialog::getDouble(this, tr("Sharpening"), tr("Degree:"), 0, -2, 2, 5);
-    setImage(controller.sharpen(image, degree));
+    delete edit;
+    delete window;
+    edit = new QLineEdit;
+    oldImage = image;
+    auto *sliderSharpness = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    sliderSharpness->setMinimum(0);
+    sliderSharpness->setMaximum(20);
+    layout->addWidget(sliderSharpness);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Sharpness"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(sliderSharpness, &QSlider::valueChanged, this, &ImageViewer::sharp);
 }
 
 void ImageViewer::uploadToImgur() {
