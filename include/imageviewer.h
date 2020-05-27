@@ -97,7 +97,11 @@ private slots:
 
     void applySharp();
 
+    void applyBlend();
+
     void blur(int ratio);
+
+    void blend(int ratio);
 
     void lighten(int ratio);
 
@@ -138,6 +142,8 @@ private:
 
     cv::Mat image;
     cv::Mat oldImage;
+    cv::Mat croppedOldImage;
+    cv::Mat blendImage;
     controller::Controller controller;
     QLabel* imageLabel;
     QScrollArea* scrollArea;
@@ -160,6 +166,7 @@ private:
     QAction* toolSaturateAct;
     QAction* toolSharpenAct;
     QAction* toolBlurAct;
+    QAction* toolBlendAct;
 
     QAction* undoAct;
     QAction* redoAct;

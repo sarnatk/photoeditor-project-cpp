@@ -306,6 +306,13 @@ QToolBar *ImageViewer::createToolBar() {
     toolSaturateAct = tools->addAction(QPixmap("icons/stars.png"), tr("Saturation"), this, &ImageViewer::applySaturation);
     toolSaturateAct->setEnabled(false);
 
+    tools->addSeparator();
+    tools->addSeparator();
+    tools->addSeparator();
+
+    toolBlendAct = tools->addAction(QPixmap("icons/blend.png"), tr("Blend"), this, &ImageViewer::applyBlend);
+    toolBlendAct->setEnabled(false);
+
     return tools;
 }
 
@@ -421,6 +428,7 @@ void ImageViewer::updateActions() {
     toolSharpenAct->setEnabled(!image.empty());
     toolBlurAct->setEnabled(!image.empty());
     toolSaturateAct->setEnabled(!image.empty());
+    toolBlendAct->setEnabled(!image.empty());
 }
 
 void ImageViewer::scaleImage(double factor) {
@@ -488,6 +496,57 @@ void ImageViewer::cancel() {
     setImage(oldImage);
     window->close();
 }
+
+void ImageViewer::blend(int ratio) {
+    auto im = croppedOldImage;
+    double alpha = (double) ratio / 50;
+    setImage(controller.blend(blendImage, im, alpha));
+}
+
+void ImageViewer::applyBlend() {
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    QStringList list;
+    for (auto &fmt : formats)
+        list.append("*." + QString(fmt));
+    auto filter = "Images (" + list.join(" ") + ")";
+
+    QString path = QFileDialog::getOpenFileName(nullptr, "Pick an image file", nullptr, filter);
+    if (path.isEmpty()) return;
+
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    blendImage = cv::imread(path.toStdString());
+    if (blendImage.empty()) {
+        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                 tr("Cannot load %1: %2")
+                                         .arg(QDir::toNativeSeparators(path), reader.errorString()));
+        return;
+    }
+
+    int x = std::min(image.cols, blendImage.cols);
+    int y = std::min(image.rows, blendImage.rows);
+    oldImage = image;
+    image = controller.crop(image, x, y, 0, 0);
+    blendImage = controller.crop(blendImage, x, y, 0, 0);
+    croppedOldImage = image;
+
+    auto *slider = new QSlider(Qt::Horizontal);
+    auto *applyButton= new QPushButton("Apply");
+    auto *cancelButton= new QPushButton("Cancel");
+    auto *layout = new QVBoxLayout;
+    window = new QDialog;
+    slider->setMinimum(0);
+    slider->setMaximum(50);
+    layout->addWidget(slider);
+    layout->addWidget(applyButton);
+    layout->addWidget(cancelButton);
+    window->setWindowTitle(tr("Blend"));
+    window->setLayout(layout);
+    window->show();
+    connect(applyButton, SIGNAL(clicked()), window, SLOT(close()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(slider, &QSlider::valueChanged, this, &ImageViewer::blend);
+    }
 
 void ImageViewer::saturate(int ratio) {
     auto im = oldImage;
